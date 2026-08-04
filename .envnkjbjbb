@@ -1,8 +1,8 @@
 APP_NAME=Laravel
 APP_ENV=local
-APP_KEY=
+APP_KEY=base64:oeAzB5dlAxTdxrutkS11KiGyZuiXm21rMnYtjLDj7GE=
 APP_DEBUG=true
-APP_URL=http://localhost
+APP_URL=http://aplikasi_qa.test
 
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
