@@ -25,12 +25,6 @@ class DatabaseSeeder extends Seeder
             'role' => 'Admin',
         ]);
 
-        $qaLead = User::create([
-            'name' => 'Sarah QA Lead',
-            'email' => 'qalead@qa.com',
-            'password' => Hash::make('password'),
-            'role' => 'QA Lead',
-        ]);
 
         $qaTester = User::create([
             'name' => 'Budi Tester',
@@ -38,6 +32,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'QA Tester',
         ]);
+
 
         $developer = User::create([
             'name' => 'Joko Developer',
@@ -54,13 +49,15 @@ class DatabaseSeeder extends Seeder
 
         // 3. Masukkan User ke Proyek (Tabel Pivot project_user)
         // QA Lead, Tester, dan Developer ditugaskan ke proyek ini
-        $project->users()->attach([$qaLead->id, $qaTester->id, $developer->id]);
+        $project->users()->attach([$qaTester->id, $developer->id]);
 
         // 4. Buat Requirement (Persyaratan Sistem)
         $requirement = Requirement::create([
             'project_id' => $project->id,
             'code' => 'REQ-PAY-01',
+            'title' => 'Payment Gateway Integration',
             'description' => 'Pengguna harus dapat melakukan checkout menggunakan metode transfer bank.',
+            'due_date' => now()->addDays(30)->toDateString(),
         ]);
 
         // 5. Buat Test Suite

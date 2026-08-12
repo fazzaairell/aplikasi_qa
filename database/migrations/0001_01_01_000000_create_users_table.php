@@ -18,7 +18,7 @@ return new class extends Migration
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         // Tambahkan baris ini untuk role sesuai ERD
-        $table->enum('role', ['Admin', 'QA Lead', 'QA Tester', 'Developer'])->default('QA Tester');
+        $table->enum('role', ['Admin','QA Tester', 'Developer'])->default('QA Tester');
         $table->rememberToken();
         $table->timestamps();
 

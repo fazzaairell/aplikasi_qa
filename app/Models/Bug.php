@@ -1,15 +1,25 @@
 <?php
 
+// app/Models/Bug.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Bug extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'test_result_id',
+        'title',
+        'description',
+        'status',
+        'assigned_to',
+        'due_date',
+        'attachment',
+    ];
 
-    protected $fillable = ['test_result_id', 'title', 'description', 'status', 'assigned_to'];
+    protected $casts = [
+        'due_date' => 'date',
+    ];
 
     public function testResult()
     {
@@ -18,6 +28,12 @@ class Bug extends Model
 
     public function assignee()
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsTo(\App\Models\User::class, 'assigned_to');
+    }
+
+    // Accessor: $bug->attachment_url
+    public function getAttachmentUrlAttribute()
+    {
+        return $this->attachment ? asset('storage/' . $this->attachment) : null;
     }
 }

@@ -9,7 +9,11 @@ class Requirement extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'code', 'description'];
+    protected $fillable = ['project_id', 'code', 'title', 'description', 'due_date'];
+
+    protected $casts = [
+        'due_date' => 'date',
+    ];
 
     public function project()
     {

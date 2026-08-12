@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Project extends Model
 {
@@ -29,5 +30,11 @@ class Project extends Model
     public function testRuns()
     {
         return $this->hasMany(TestRun::class);
+    }
+
+    // Tambahan relasi tembus untuk menghitung Test Case melalui Test Suite
+    public function testCases(): HasManyThrough
+    {
+        return $this->hasManyThrough(TestCase::class, TestSuite::class);
     }
 }
