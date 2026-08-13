@@ -15,7 +15,7 @@
 
     <!-- FILTER PROYEK -->
     <form method="GET" class="flex items-center space-x-2">
-        <select name="project_id" onchange="this.form.submit()" class="px-4 py-2.5 bg-[#131b2e] border border-indigo-500/20 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+        <select name="project_id" onchange="this.form.submit()" class="px-4 py-2.5 bg-[#111827] border border-indigo-500/20 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
             <option value="">Semua Proyek</option>
             @foreach($projects as $p)
                 <option value="{{ $p->id }}" {{ request('project_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
@@ -25,7 +25,7 @@
 
     <!-- KARTU NAVIGASI CEPAT -->
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <a href="{{ route('requirements.index') }}" class="group bg-gradient-to-br from-[#131b2e] to-[#0f1626] border border-indigo-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-indigo-500/50 hover:bg-[#17213a] transition duration-300">
+        <a href="{{ route('requirements.index') }}" class="group bg-gradient-to-br from-[#111827] to-[#0c0f1a] border border-indigo-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-indigo-500/50 hover:bg-[#1f2937] transition duration-300">
             <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
             </div>
@@ -34,7 +34,7 @@
             <div class="text-[10px] text-indigo-400 mt-2 font-medium">Lihat RTM &rarr;</div>
         </a>
 
-        <a href="{{ route('test-suites.index') }}" class="group bg-gradient-to-br from-[#131b2e] to-[#0f1626] border border-violet-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-violet-500/50 hover:bg-[#17213a] transition duration-300">
+        <a href="{{ route('test-suites.index') }}" class="group bg-gradient-to-br from-[#111827] to-[#0c0f1a] border border-violet-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-violet-500/50 hover:bg-[#1f2937] transition duration-300">
             <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 mb-3 group-hover:scale-110 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
             </div>
@@ -43,7 +43,7 @@
             <div class="text-[10px] text-violet-400 mt-2 font-medium">Lihat test suites &rarr;</div>
         </a>
 
-        <a href="{{ route('test-runs.index') }}" class="group bg-gradient-to-br from-[#131b2e] to-[#0f1626] border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-purple-500/50 hover:bg-[#17213a] transition duration-300">
+        <a href="{{ route('test-runs.index') }}" class="group bg-gradient-to-br from-[#111827] to-[#0c0f1a] border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-purple-500/50 hover:bg-[#1f2937] transition duration-300">
             <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-110 transition">
                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </div>
@@ -52,7 +52,7 @@
             <div class="text-[10px] text-purple-400 mt-2 font-medium">Lihat test runs &rarr;</div>
         </a>
 
-        <a href="{{ route('projects.index') }}" class="group bg-gradient-to-br from-[#131b2e] to-[#0f1626] border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-purple-500/50 hover:bg-[#17213a] transition duration-300">
+        <a href="{{ route('projects.index') }}" class="group bg-gradient-to-br from-[#111827] to-[#0c0f1a] border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-purple-500/50 hover:bg-[#1f2937] transition duration-300">
             <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-110 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
             </div>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- TEST RUN TERBARU -->
-    <div class="bg-[#131b2e] border border-slate-800/80 rounded-2xl overflow-hidden">
+    <div class="bg-[#111827] border border-slate-800/80 rounded-2xl overflow-hidden">
         <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
             <span class="text-sm font-bold text-white">Test Run Terbaru</span>
             <a href="{{ route('test-runs.index') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">Lihat semua &rarr;</a>

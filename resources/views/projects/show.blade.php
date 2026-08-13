@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-[#0b0f19]">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $project->name }} - Detail Proyek - QA Platform</title>
+    <title>{{ $project->name }} - Detail Proyek - QA Management</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Alpine.js untuk interaksi modal/form edit -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
 </head>
 <body class="h-full font-sans text-slate-100 flex" x-data="{ showEditForm: false }">
 
@@ -19,7 +21,7 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#0b0f19]">
         
         <!-- TOPBAR -->
-        <header class="h-20 border-b border-slate-800/80 px-8 flex items-center justify-between sticky top-0 bg-[#0b0f19]/80 backdrop-blur-md z-10">
+        <header class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-10" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
             <a href="{{ route('projects.index') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center space-x-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 <span>Kembali ke Daftar Proyek</span>

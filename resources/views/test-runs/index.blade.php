@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-[#0b0f19]">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Runs - QA Platform</title>
+    <title>Test Runs - QA Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data='{ 
     sidebarOpen: false, 
@@ -17,7 +19,8 @@
     activeTestResultId: null,
     editForm: { id: null, title: "", status: "Active" },
     bugForm: { bug_title: "", bug_description: "", assigned_to: "", due_date: "", attachment: null },
-    form: { project_id: "{{ $selectedProjectId ?? "" }}", title: "" },
+    projectsData: @json($projects),
+    form: { project_id: "{{ $selectedProjectId ?? "" }}", test_suite_id: "", title: "" },
     loading: false,
     expandedRuns: {
         @foreach($testRuns as $index => $run)
@@ -32,7 +35,7 @@
         axios.post("{{ route("test-runs.store") }}", this.form)
             .then(response => {
                 alert(response.data.message);
-                window.location.reload();
+                window.location.href = "?project_id=" + this.form.project_id;
             })
             .catch(error => {
                 alert("Gagal memulai test run.");
@@ -114,15 +117,15 @@
     <x-sidebar />
 @endif
     <!-- MAIN CONTENT -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#0b0f19] h-full">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
         
         <!-- TOPBAR -->
-        <header class="h-20 border-b border-slate-800/80 px-8 flex items-center justify-between sticky top-0 bg-[#0b0f19]/80 backdrop-blur-md z-30">
+        <header class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
             <div class="flex items-center space-x-4">
-                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-slate-400 hover:text-white p-2 rounded-lg bg-[#131b2e] border border-slate-800 cursor-pointer">
+                <button @click="$dispatch('toggle-sidebar')" class="md:hidden text-slate-400 hover:text-white p-2 rounded-lg bg-[#131b2e] border border-slate-800 cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
-                <div class="w-48 md:w-96">
+                <div class="w-32 sm:w-48 md:w-96">
                     <input type="text" placeholder="Cari test run..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
@@ -221,6 +224,18 @@
                                     <button @click="toggleRun({{ $run->id }})" class="px-3.5 py-1.5 rounded-lg bg-[#0b0f19] border border-slate-700/80 hover:bg-slate-800 text-xs font-semibold text-slate-300 transition cursor-pointer">
                                         <span x-text="expandedRuns[{{ $run->id }}] ? 'Tutup' : 'Detail'">Detail</span>
                                     </button>
+                                    <!-- TOMBOL LIHAT RINGKASAN — hanya muncul saat semua sudah dieksekusi -->
+                                    @if($total > 0 && $untested === 0)
+                                    <a href="{{ route('test-runs.summary', $run->id) }}"
+                                       class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white transition cursor-pointer flex items-center gap-1"
+                                       style="background:linear-gradient(135deg,#4f46e5,#6366f1);"
+                                       title="Lihat Test Summary Report">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Ringkasan
+                                    </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -294,7 +309,7 @@
 
     <!-- MODAL MULAI TEST RUN -->
     <div x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
-        <div @click.away="showCreateModal = false" class="bg-[#131b2e] border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+        <div @click.away="showCreateModal = false" class="bg-[#131b2e] border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[85vh] overflow-y-auto">
             <div class="flex items-center justify-between">
                 <h3 class="text-sm font-bold text-white">Mulai Test Run Baru</h3>
                 <button @click="showCreateModal = false" class="text-slate-400 hover:text-white cursor-pointer">&times;</button>
@@ -302,11 +317,20 @@
             <form @submit.prevent="submitTestRun" class="space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Pilih Proyek</label>
-                    <select x-model="form.project_id" required class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                    <select x-model="form.project_id" @change="form.test_suite_id = ''" required class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
                         <option value="">-- Pilih Proyek --</option>
                         @foreach($projects as $project)
                             <option value="{{ $project->id }}">{{ $project->name }}</option>
                         @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Pilih Test Suite (Opsional)</label>
+                    <select x-model="form.test_suite_id" class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <option value="">Semua Test Suite</option>
+                        <template x-for="suite in (projectsData.find(p => p.id == form.project_id)?.test_suites || [])" :key="suite.id">
+                            <option :value="suite.id" x-text="suite.name"></option>
+                        </template>
                     </select>
                 </div>
                 <div>
@@ -325,9 +349,37 @@
     </div>
 
     <!-- MODAL EDIT TEST RUN -->
+    <div x-show="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
+        <div @click.away="showEditModal = false" class="bg-[#131b2e] border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white">Edit Test Run</h3>
+                <button @click="showEditModal = false" class="text-slate-400 hover:text-white cursor-pointer">&times;</button>
+            </div>
+            <form @submit.prevent="updateTestRun" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Judul Test Run</label>
+                    <input type="text" x-model="editForm.title" required placeholder="Contoh: Sprint 3 Regression Test" class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Status</label>
+                    <select x-model="editForm.status" required class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <option value="Active">Active</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" @click="showEditModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-semibold cursor-pointer">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 <!-- MODAL LAPORAN BUG KETIKA FAILED -->
 <div x-show="showBugModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
-    <div @click.away="showBugModal = false" class="bg-[#131b2e] border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
+    <div @click.away="showBugModal = false" class="bg-[#131b2e] border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-white flex items-center space-x-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>

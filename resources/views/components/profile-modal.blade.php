@@ -36,7 +36,8 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="relative w-full max-w-sm bg-[#0b0f19] border border-slate-800/80 rounded-2xl p-6 shadow-xl"
+        class="relative w-full max-w-sm border rounded-2xl p-6 shadow-xl"
+        style="background:#111827; border-color:rgba(255,255,255,0.08);"
         @click.outside="open = false"
     >
         {{-- Tombol tutup --}}
@@ -79,7 +80,7 @@
                             </span>
                         </template>
                     </div>
-                    <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#131b2e] border border-slate-700 flex items-center justify-center group-hover:border-indigo-500 transition">
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#111827] border border-slate-700 flex items-center justify-center group-hover:border-indigo-500 transition">
                         <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     </div>
                     <input
@@ -114,7 +115,7 @@
                         type="text"
                         name="name"
                         value="{{ old('name', auth()->user()->name) }}"
-                        class="w-full bg-[#131b2e] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                        class="w-full bg-[#111827] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
                     >
                     @error('name')
                         <span class="text-xs text-red-400">{{ $message }}</span>
@@ -127,7 +128,7 @@
                         type="email"
                         name="email"
                         value="{{ old('email', auth()->user()->email) }}"
-                        class="w-full bg-[#131b2e] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                        class="w-full bg-[#111827] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
                     >
                     @error('email')
                         <span class="text-xs text-red-400">{{ $message }}</span>
@@ -170,7 +171,7 @@
 
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Password saat ini</label>
-                    <input type="password" name="current_password" class="w-full bg-[#131b2e] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                    <input type="password" name="current_password" class="w-full bg-[#111827] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                     @error('current_password')
                         <span class="text-xs text-red-400">{{ $message }}</span>
                     @enderror
@@ -178,7 +179,7 @@
 
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Password baru</label>
-                    <input type="password" name="password" class="w-full bg-[#131b2e] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                    <input type="password" name="password" class="w-full bg-[#111827] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                     @error('password')
                         <span class="text-xs text-red-400">{{ $message }}</span>
                     @enderror
@@ -186,7 +187,7 @@
 
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Konfirmasi password baru</label>
-                    <input type="password" name="password_confirmation" class="w-full bg-[#131b2e] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                    <input type="password" name="password_confirmation" class="w-full bg-[#111827] border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                 </div>
 
                 <button

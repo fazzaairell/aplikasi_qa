@@ -12,6 +12,7 @@ use App\Http\Controllers\TestSuiteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\PreventBackHistory;
 
 /*
@@ -121,5 +122,12 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     // 5. Bug Tracker
     Route::get('/bugs', [BugController::class, 'index'])->name('bugs.index');
     Route::patch('/bugs/{id}/status', [BugController::class, 'updateStatus'])->name('bugs.update-status');
+
+    // 6. Notifikasi
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // 7. Test Summary Report
+    Route::get('/test-runs/{id}/summary', [TestRunController::class, 'summary'])->name('test-runs.summary');
 
 });

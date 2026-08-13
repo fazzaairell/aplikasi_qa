@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-[#0b0f19]">
+<html lang="id" class="h-full bg-[#0c0f1a]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 </head>
 <body class="h-full flex items-center justify-center font-sans text-slate-100">
 
-    <div class="w-full max-w-md p-8 rounded-2xl bg-[#0b0f19]">
+    <div class="w-full max-w-md p-8 rounded-2xl bg-[#0c0f1a]">
 
         <div class="mb-8">
             <h1 class="text-3xl font-bold tracking-tight text-white mb-2">Lupa Password</h1>
@@ -37,7 +37,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     </span>
                     <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="andi@company.com"
-                        class="w-full pl-11 pr-4 py-3 bg-[#131b2e] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm transition">
+                        class="w-full pl-11 pr-4 py-3 bg-[#111827] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm transition">
                 </div>
             </div>
 

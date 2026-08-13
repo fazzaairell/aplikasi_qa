@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $activeBugs = Bug::whereIn('status', ['Open', 'In Progress', 'Reopened'])->count();
 
         // Test run yang masih berjalan
-        $activeTestRuns = TestRun::where('status', 'Active')->latest()->take(2)->get();
+        $activeTestRuns = TestRun::with(['testResults', 'project'])->where('status', 'Active')->latest()->take(2)->get();
 
         // List untuk ditampilkan
         $recentBugs = Bug::latest()->take(4)->get();
@@ -99,7 +99,11 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $bugs = Bug::where('assigned_to', $user->id)
-            ->with('testResult.testCase.testSuite.project')
+            ->with([
+                'testResult.testCase.testSuite.project',
+                'testResult.testCase.requirement',  // ← diperlukan untuk Requirement & Due Date
+                'assignee',
+            ])
             ->latest()
             ->get();
 

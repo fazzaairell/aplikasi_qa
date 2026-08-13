@@ -13,12 +13,15 @@ class Bug extends Model
         'description',
         'status',
         'assigned_to',
+        'reported_by',
         'due_date',
+        'finish_date',
         'attachment',
     ];
 
     protected $casts = [
-        'due_date' => 'date',
+        'due_date'    => 'date',
+        'finish_date' => 'date',
     ];
 
     public function testResult()
@@ -29,6 +32,16 @@ class Bug extends Model
     public function assignee()
     {
         return $this->belongsTo(\App\Models\User::class, 'assigned_to');
+    }
+
+    public function reporter()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'reported_by');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\BugNotification::class, 'bug_id');
     }
 
     // Accessor: $bug->attachment_url
