@@ -78,16 +78,16 @@
             @endphp
 
             @foreach($navItems as $item)
-            @php $isActive = request()->routeIs($item['match']); @endphp
+            @php
+                $isActive = request()->routeIs($item['match']);
+                $linkClasses = $isActive
+                    ? 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'
+                    : 'text-slate-500 border border-transparent hover:bg-white/5 hover:text-slate-200';
+            @endphp
             <a href="{{ route($item['route']) }}"
-               :class="collapsed ? 'md:justify-center md:px-3' : ''"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group"
-               :title="collapsed ? '{{ $item['label'] }}' : ''"
-               style="{{ $isActive
-                   ? 'background:rgba(99,102,241,0.12); color:#a5b4fc; border: 1px solid rgba(99,102,241,0.2);'
-                   : 'color:#64748b; border: 1px solid transparent;' }}"
-               onmouseover="if(!{{ $isActive ? 'true' : 'false' }}) { this.style.background='rgba(255,255,255,0.04)'; this.style.color='#e2e8f0'; }"
-               onmouseout="if(!{{ $isActive ? 'true' : 'false' }}) { this.style.background=''; this.style.color='#64748b'; }">
+            :class="collapsed ? 'md:justify-center md:px-3' : ''"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group {{ $linkClasses }}"
+            :title="collapsed ? '{{ $item['label'] }}' : ''">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $item['icon'] }}"/>
                 </svg>
