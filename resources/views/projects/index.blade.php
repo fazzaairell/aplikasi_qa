@@ -142,6 +142,6 @@
             </form>
         </div>
     </div>
-
+<x-profile-modal />
 </body>
 </html>

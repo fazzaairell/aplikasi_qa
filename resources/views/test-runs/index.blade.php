@@ -420,6 +420,7 @@
 document.querySelectorAll('.progress-bar').forEach(function (bar) {
     bar.style.width = bar.dataset.width + '%';
 });
- </script>
+</script>
+<x-profile-modal />
 </body>
 </html>

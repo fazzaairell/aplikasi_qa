@@ -127,7 +127,7 @@
                     $reqTitle    = $bug->testResult?->testCase?->requirement?->title ?? null;
                     $suiteName   = $bug->testResult?->testCase?->testSuite?->name ?? null;
                     $caseName    = $bug->testResult?->testCase?->title ?? null;
-                    $dueDate     = $bug->testResult?->testCase?->requirement?->due_date;
+                    $dueDate     = $bug->due_date;
                     $priority    = $bug->testResult?->testCase?->priority ?? 'Low';
                 @endphp
                 <tr class="bug-row border-b border-white/[0.04] transition" data-status="{{ $bug->status }}">
