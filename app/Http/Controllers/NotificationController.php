@@ -3,14 +3,52 @@
 namespace App\Http\Controllers;
 
 use App\Models\BugNotification;
+use App\Models\Bug;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
     /**
-     * Tandai satu notifikasi sebagai sudah dibaca.
-     * Redirect ke test run terkait bug tersebut.
+     * Halaman timeline notifikasi
+     */
+    public function timeline(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = BugNotification::with(['bug.testResult.testCase.testSuite.project', 'user'])
+            ->where('user_id', $user->id)
+            ->latest('created_at');
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('read_status')) {
+            if ($request->read_status === 'unread') {
+                $query->where('is_read', false);
+            } elseif ($request->read_status === 'read') {
+                $query->where('is_read', true);
+            }
+        }
+
+        $notifications = $query->paginate(20);
+        $unreadCount   = BugNotification::where('user_id', $user->id)->where('is_read', false)->count();
+
+        $types = [
+            'bug_reported'    => '🐛 Bug Dilaporkan',
+            'bug_in_progress' => '⚙️ Bug Sedang Dikerjakan',
+            'bug_done_review' => '🔔 Bug Siap Direview',
+            'bug_reopened'    => '⚠️ Bug Di-reopen',
+            'bug_resolved'    => '✅ Bug Diselesaikan',
+            'bug_closed'      => '🎉 Bug Ditutup',
+        ];
+
+        return view('notifications.timeline', compact('notifications', 'unreadCount', 'types'));
+    }
+
+    /**
+     * Tandai satu notifikasi sebagai dibaca → redirect ke bug terkait
      */
     public function markRead(int $id)
     {
@@ -20,20 +58,17 @@ class NotificationController extends Controller
 
         $notif->update(['is_read' => true]);
 
-        // Arahkan ke test run yang menghasilkan bug ini
-        $testRunId = $notif->bug?->testResult?->test_run_id;
-
-        if ($testRunId) {
-            return redirect()->route('test-runs.index', ['highlight' => $testRunId])
-                ->with('info', 'Silakan lakukan retest pada test run terkait.');
+        // Redirect ke halaman bug (bukan test run) — lebih relevan untuk semua role
+        if ($notif->bug_id) {
+            return redirect()->route('bugs.show', $notif->bug_id);
         }
 
-        return redirect()->route('bugs.index')
-            ->with('info', 'Notifikasi telah ditandai sebagai dibaca.');
+        return redirect()->route('notifications.timeline')
+            ->with('success', 'Notifikasi telah ditandai sebagai dibaca.');
     }
 
     /**
-     * Tandai semua notifikasi milik user yang login sebagai dibaca.
+     * Tandai semua notifikasi sebagai dibaca
      */
     public function markAllRead()
     {

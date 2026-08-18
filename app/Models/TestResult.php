@@ -11,6 +11,19 @@ class TestResult extends Model
 
     protected $fillable = ['test_run_id', 'test_case_id', 'status', 'executed_by'];
 
+    protected static function booted(): void
+    {
+        static::updated(function (TestResult $testResult) {
+            if ($testResult->wasChanged('status')) {
+                event(new \App\Events\TestResultStatusChanged(
+                    $testResult,
+                    $testResult->getOriginal('status'),
+                    $testResult->status
+                ));
+            }
+        });
+    }
+
     public function testRun()
     {
         return $this->belongsTo(TestRun::class);

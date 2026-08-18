@@ -12,14 +12,14 @@
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ 
     showAddSuiteModal: false, 
     showAddCaseModal: false, 
+    showAddStep: false,
     activeSuiteId: null,
+    selectedTestCaseId: null,
     sidebarOpen: false,
     collapsed: false
 }">
 
-@if(auth()->user()->role !== 'QA Tester')
     <x-sidebar />
-@endif
     <!-- MAIN CONTENT -->
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
         
@@ -34,9 +34,14 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <button @click="showAddSuiteModal = true" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 cursor-pointer">
-                    + Test Suite Baru
-                </button>
+                @if($selectedProjectId)
+                    <a href="{{ route('master-test-cases.index', ['project_id' => $selectedProjectId]) }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition cursor-pointer">
+                        + Master Test Case
+                    </a>
+                    <button @click="showAddSuiteModal = true" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 cursor-pointer">
+                        + Test Suite Baru
+                    </button>
+                @endif
             </div>
         </header>
 
@@ -52,8 +57,28 @@
                 </div>
             @endif
 
+            @if(!$selectedProjectId)
+                <!-- DAFTAR PROYEK (GRID) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @forelse($projects as $p)
+                        <a href="{{ route('test-suites.index', ['project_id' => $p->id]) }}" class="block p-6 rounded-2xl bg-[#131b2e] border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/50 transition group shadow-xl">
+                            <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 mb-2">{{ $p->name }}</h3>
+                            <p class="text-xs text-slate-400 mb-4">{{ Str::limit($p->description, 80) ?: 'Tidak ada deskripsi' }}</p>
+                            <div class="flex items-center justify-between text-[11px] font-semibold">
+                                <span class="text-slate-500">{{ $p->test_suites_count ?? 0 }} Test Suites</span>
+                                <span class="text-indigo-400 group-hover:underline">Kelola Test Suites &rarr;</span>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="col-span-full p-8 text-center bg-[#131b2e] border border-slate-800 rounded-2xl text-slate-400 text-sm">
+                            Belum ada proyek yang tersedia.
+                        </div>
+                    @endforelse
+                </div>
+            @else
             <!-- TAB PILIHAN PROYEK -->
             <div class="flex items-center space-x-3 overflow-x-auto pb-2">
+                <a href="{{ route('test-suites.index') }}" class="px-4 py-2.5 rounded-xl text-xs font-semibold transition border whitespace-nowrap bg-[#131b2e] text-slate-400 border-slate-800 hover:text-white">&larr; Semua Proyek</a>
                 @foreach($projects as $p)
                     <a href="{{ route('test-suites.index', ['project_id' => $p->id]) }}" 
                        class="px-4 py-2.5 rounded-xl text-xs font-semibold transition border whitespace-nowrap {{ $selectedProjectId == $p->id ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/30' : 'bg-[#131b2e] text-slate-400 border-slate-800 hover:text-white' }}">
@@ -122,9 +147,18 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-800/40 text-xs">
                                     @forelse($suite->testCases as $tc)
-                                        <tr class="hover:bg-slate-800/20 transition">
+                                        <tr class="hover:bg-slate-800/20 transition align-top">
                                             <td class="py-3.5 px-6 font-medium text-slate-200">
-                                                {{ $tc->title }}
+                                                <div class="font-semibold">{{ $tc->title }}</div>
+                                                @if($tc->subSteps->isNotEmpty())
+                                                    <div class="mt-2 space-y-1">
+                                                        @foreach($tc->subSteps as $step)
+                                                            <div class="text-[10px] text-slate-400 bg-slate-800/40 rounded px-2 py-1">
+                                                                <span class="font-bold text-indigo-300">{{ $step->step_number }}.</span> {{ $step->description }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td class="py-3.5 px-6">
                                                 @php
@@ -155,6 +189,7 @@
                                                 {{ optional($tc->requirement)->code ?? '-' }}
                                             </td>
                                             <td class="py-3.5 px-6 text-right space-x-2">
+                                                <button type="button" @click="showAddStep = true; selectedTestCaseId = '{{ $tc->id }}'" class="text-indigo-400 hover:text-indigo-300 text-[11px] font-semibold cursor-pointer">Sub-step</button>
                                                 <form action="{{ route('test-cases.destroy', $tc->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus test case ini?');">
                                                     @csrf
                                                     @method('DELETE')
@@ -185,6 +220,7 @@
                     </div>
                 @endforelse
             </div>
+            @endif
         </main>
     </div>
 
@@ -227,6 +263,15 @@
                     <input type="text" name="title" required placeholder="Contoh: Login dengan kredensial valid" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
                 </div>
                 <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Pilih Master Test Case (Opsional)</label>
+                    <select name="master_test_case_id" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                        <option value="">Pilih master test case yang bisa dipakai ulang</option>
+                        @foreach(App\Models\MasterTestCase::where('project_id', $selectedProjectId)->get() as $masterCase)
+                            <option value="{{ $masterCase->id }}">{{ $masterCase->title }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Requirement Terkait</label>
                     <select name="requirement_id" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
                         <option value="">Pilih Requirement (Opsional)</option>
@@ -255,6 +300,36 @@
                 <div class="flex items-center justify-end space-x-3 pt-2">
                     <button type="button" @click="showAddCaseModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
                     <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition cursor-pointer">Simpan Test Case</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="showAddStep" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" style="display: none;">
+        <div @click.away="showAddStep = false" class="w-full max-w-lg p-6 rounded-2xl bg-[#131b2e] border border-slate-800 space-y-4 shadow-2xl mx-4 md:mx-0 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Tambah Langkah Uji</h3>
+                <button @click="showAddStep = false" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <form action="{{ route('test-case-steps.store') }}" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" name="test_case_id" x-model="selectedTestCaseId">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Nomor Langkah</label>
+                    <input type="number" name="step_number" min="1" value="1" required class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Deskripsi Langkah</label>
+                    <textarea name="description" rows="3" required class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Expected Result</label>
+                    <textarea name="expected_result" rows="2" required class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
+                </div>
+                <div class="flex items-center justify-end space-x-3 pt-2">
+                    <button type="button" @click="showAddStep = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition cursor-pointer">Simpan</button>
                 </div>
             </form>
         </div>

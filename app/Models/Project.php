@@ -10,7 +10,11 @@ class Project extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'status', 'test_plan'];
+
+    protected $casts = [
+        'test_plan' => 'array',
+    ];
 
     public function users()
     {

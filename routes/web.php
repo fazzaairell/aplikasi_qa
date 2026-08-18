@@ -13,6 +13,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\DashboardReportController;
 use App\Http\Middleware\PreventBackHistory;
 
 /*
@@ -107,7 +109,11 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('/test-suites', [TestSuiteController::class, 'index'])->name('test-suites.index');
     Route::post('/test-suites', [TestSuiteController::class, 'storeSuite'])->name('test-suites.store');
     Route::delete('/test-suites/{id}', [TestSuiteController::class, 'destroySuite'])->name('test-suites.destroy');
+    Route::get('/master-test-cases', [TestSuiteController::class, 'masterIndex'])->name('master-test-cases.index');
+    Route::post('/master-test-cases', [TestSuiteController::class, 'storeMasterCase'])->name('master-test-cases.store');
+    Route::post('/master-test-cases/attach', [TestSuiteController::class, 'attachMasterCase'])->name('master-test-cases.attach');
     Route::post('/test-cases', [TestSuiteController::class, 'storeCase'])->name('test-cases.store');
+    Route::post('/test-case-steps', [TestSuiteController::class, 'storeSubStep'])->name('test-case-steps.store');
     Route::delete('/test-cases/{id}', [TestSuiteController::class, 'destroyCase'])->name('test-cases.destroy');
 
     // 4. Test Runs & Eksekusi Hasil Tes
@@ -121,13 +127,23 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     // 5. Bug Tracker
     Route::get('/bugs', [BugController::class, 'index'])->name('bugs.index');
+    Route::get('/bugs/history', [BugController::class, 'history'])->name('bugs.history');
+    Route::get('/bugs/{id}', [BugController::class, 'show'])->name('bugs.show');
     Route::patch('/bugs/{id}/status', [BugController::class, 'updateStatus'])->name('bugs.update-status');
 
     // 6. Notifikasi
+    Route::get('/notifications/timeline', [NotificationController::class, 'timeline'])->name('notifications.timeline');
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
     // 7. Test Summary Report
     Route::get('/test-runs/{id}/summary', [TestRunController::class, 'summary'])->name('test-runs.summary');
+
+    // 8. Comprehensive Reports & Dashboard Reports
+    Route::get('/reports/comprehensive', [DashboardReportController::class, 'reports'])->name('reports.comprehensive');
+
+    // 9. Bug History & Report
+    Route::get('/reports/bug-history', [ReportController::class, 'bugHistory'])->name('report.bug-history');
+    Route::get('/reports/bug/{bugId}', [ReportController::class, 'bugDetail'])->name('report.bug-detail');
 
 });

@@ -17,9 +17,7 @@
     collapsed: false
 
 }">
-@if(auth()->user()->role !== 'QA Tester')
     <x-sidebar />
-@endif
     <!-- MAIN CONTENT -->
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
         
@@ -34,9 +32,11 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <button @click="showAddModal = true" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 cursor-pointer">
-                    + Tambah Requirement
-                </button>
+                @if($selectedProjectId)
+                    <button @click="showAddModal = true" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 cursor-pointer">
+                        + Tambah Requirement
+                    </button>
+                @endif
             </div>
         </header>
 
@@ -52,8 +52,28 @@
                 </div>
             @endif
 
+            @if(!$selectedProjectId)
+                <!-- DAFTAR PROYEK (GRID) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @forelse($projects as $p)
+                        <a href="{{ route('requirements.index', ['project_id' => $p->id]) }}" class="block p-6 rounded-2xl bg-[#131b2e] border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/50 transition group shadow-xl">
+                            <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 mb-2">{{ $p->name }}</h3>
+                            <p class="text-xs text-slate-400 mb-4">{{ Str::limit($p->description, 80) ?: 'Tidak ada deskripsi' }}</p>
+                            <div class="flex items-center justify-between text-[11px] font-semibold">
+                                <span class="text-slate-500">{{ $p->requirements_count ?? 0 }} Requirements</span>
+                                <span class="text-indigo-400 group-hover:underline">Kelola Requirements &rarr;</span>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="col-span-full p-8 text-center bg-[#131b2e] border border-slate-800 rounded-2xl text-slate-400 text-sm">
+                            Belum ada proyek yang tersedia.
+                        </div>
+                    @endforelse
+                </div>
+            @else
             <!-- TAB PILIHAN PROYEK -->
             <div class="flex items-center space-x-3 overflow-x-auto pb-2">
+                <a href="{{ route('requirements.index') }}" class="px-4 py-2.5 rounded-xl text-xs font-semibold transition border whitespace-nowrap bg-[#131b2e] text-slate-400 border-slate-800 hover:text-white">&larr; Semua Proyek</a>
                 @foreach($projects as $p)
                     <a href="{{ route('requirements.index', ['project_id' => $p->id]) }}" 
                        class="px-4 py-2.5 rounded-xl text-xs font-semibold transition border whitespace-nowrap {{ $selectedProjectId == $p->id ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/30' : 'bg-[#131b2e] text-slate-400 border-slate-800 hover:text-white' }}">
@@ -101,6 +121,7 @@
                     </tbody>
                 </table>
             </div>
+            @endif
         </main>
     </div>
 

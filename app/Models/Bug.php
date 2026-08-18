@@ -11,6 +11,7 @@ class Bug extends Model
         'test_result_id',
         'title',
         'description',
+        'expected_result',
         'status',
         'assigned_to',
         'reported_by',
@@ -42,6 +43,11 @@ class Bug extends Model
     public function notifications()
     {
         return $this->hasMany(\App\Models\BugNotification::class, 'bug_id');
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(\App\Models\BugHistory::class, 'bug_id')->orderBy('created_at', 'desc');
     }
 
     // Accessor: $bug->attachment_url

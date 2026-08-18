@@ -12,16 +12,14 @@
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ 
     showAddModal: false, 
     showEditModal: false, 
-    editForm: { id: '', name: '', description: '' },
+    editForm: { id: '', name: '', description: '', status: 'Aktif', test_plan: '' },
     sidebarOpen: false,
     collapsed: false
     
     }">
 
 
-@if(auth()->user()->role !== 'QA Tester')
     <x-sidebar />
-@endif
     <!-- MAIN CONTENT -->
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
         
@@ -63,7 +61,7 @@
                                 <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-mono text-[11px] font-bold">PROJECT</span>
                                 <div class="flex items-center space-x-3">
                                     <a href="{{ route('projects.show', $project->id) }}" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer">Detail</a>
-                                    <button @click="showEditModal = true; editForm = { id: '{{ $project->id }}', name: '{{ $project->name }}', description: '{{ $project->description }}' }" class="text-xs text-slate-400 hover:text-indigo-400 font-semibold cursor-pointer">Edit</button>
+                                    <button @click="showEditModal = true; editForm = { id: '{{ $project->id }}', name: '{{ $project->name }}', description: '{{ $project->description }}', status: '{{ $project->status ?? 'Aktif' }}', test_plan: '{{ str_replace("'", "\\'", $project->test_plan ?? '') }}' }" class="text-xs text-slate-400 hover:text-indigo-400 font-semibold cursor-pointer">Edit</button>
                                     <form action="{{ route('projects.destroy', $project->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus proyek ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -105,8 +103,20 @@
                     <input type="text" name="name" required placeholder="Contoh: E-Commerce Platform" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
                 </div>
                 <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Status</label>
+                    <select name="status" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Deskripsi</label>
                     <textarea name="description" rows="3" required placeholder="Deskripsi singkat mengenai proyek..." class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Test Plan</label>
+                    <textarea name="test_plan" rows="4" placeholder="Contoh: Scope: ...&#10;Jadwal: ...&#10;PIC: ...&#10;Strategi: ..." class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-2">
                     <button type="button" @click="showAddModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
@@ -132,8 +142,20 @@
                     <input type="text" name="name" x-model="editForm.name" required class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
                 </div>
                 <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Status</label>
+                    <select name="status" x-model="editForm.status" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Deskripsi</label>
                     <textarea name="description" rows="3" x-model="editForm.description" required class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Test Plan</label>
+                    <textarea name="test_plan" rows="4" x-model="editForm.test_plan" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-2">
                     <button type="button" @click="showEditModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>

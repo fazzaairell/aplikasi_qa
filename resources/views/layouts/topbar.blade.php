@@ -13,12 +13,22 @@
 
     <!-- TOPBAR -->
     <header class="h-16 border-b sticky top-0 z-40" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
-        <div class="max-w-7xl mx-auto px-8 h-full flex items-center justify-between">
-            <div class="flex items-center space-x-3">
+        <div class="max-w-7xl mx-auto px-8 h-full flex items-center justify-between relative">
+            <div class="flex items-center space-x-3 w-1/3">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">Q</div>
                 <span class="font-bold text-lg text-white tracking-wide">QA Platform</span>
             </div>
-            <div class="flex items-center space-x-3">
+
+            <!-- DEVELOPER LINKS CENTERED -->
+            <div class="hidden md:flex flex-1 justify-center space-x-2 w-1/3">
+                @if(auth()->check() && auth()->user()->role === 'Developer')
+                    <a href="{{ route('dashboard.developer') }}" class="px-3 py-1.5 text-xs font-semibold {{ request()->routeIs('dashboard.developer') ? 'text-white bg-white/[0.1]' : 'text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08]' }} rounded-lg transition border border-white/[0.05]">Dashboard</a>
+                    <a href="{{ route('notifications.timeline') }}" class="px-3 py-1.5 text-xs font-semibold {{ request()->routeIs('notifications.timeline') ? 'text-white bg-white/[0.1]' : 'text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08]' }} rounded-lg transition border border-white/[0.05]">Notifikasi</a>
+                    <a href="{{ route('bugs.index') }}" class="px-3 py-1.5 text-xs font-semibold {{ request()->routeIs('bugs.index') ? 'text-white bg-white/[0.1]' : 'text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08]' }} rounded-lg transition border border-white/[0.05]">Bug Report</a>
+                @endif
+            </div>
+
+            <div class="flex items-center justify-end space-x-3 w-1/3">
 
                 {{-- ════ BELL ICON NOTIFIKASI ════ --}}
                 @php

@@ -32,4 +32,9 @@ class TestCase extends Model
     {
         return $this->hasMany(TestResult::class);
     }
+
+    public function subSteps()
+    {
+        return $this->hasMany(TestCaseStep::class);
+    }
 }

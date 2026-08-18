@@ -91,14 +91,12 @@
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap w-12">No</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[200px]">Judul Bug</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[130px]">Project</th>
-                    <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[160px]">Requirement</th>
-                    <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[140px]">Test Suite</th>
-                    <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[140px]">Test Case</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">Due Date</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">Finish Date</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[85px]">Priority</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[110px]">Status</th>
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[90px]">Dibuat</th>
+                    <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[80px]">Aksi</th>
                 </tr>
             </thead>
             <tbody id="dev-bugs-tbody">
@@ -156,33 +154,6 @@
                         @endif
                     </td>
 
-                    {{-- REQUIREMENT --}}
-                    <td class="px-4 py-3.5 whitespace-nowrap">
-                        @if($reqTitle)
-                        <span class="text-slate-300 truncate block max-w-[160px]" title="{{ $reqTitle }}">{{ $reqTitle }}</span>
-                        @else
-                        <span class="text-slate-600">—</span>
-                        @endif
-                    </td>
-
-                    {{-- TEST SUITE --}}
-                    <td class="px-4 py-3.5 whitespace-nowrap">
-                        @if($suiteName)
-                        <span class="text-slate-300 truncate block max-w-[140px]" title="{{ $suiteName }}">{{ $suiteName }}</span>
-                        @else
-                        <span class="text-slate-600">—</span>
-                        @endif
-                    </td>
-
-                    {{-- TEST CASE --}}
-                    <td class="px-4 py-3.5 whitespace-nowrap">
-                        @if($caseName)
-                        <span class="text-slate-300 truncate block max-w-[140px]" title="{{ $caseName }}">{{ $caseName }}</span>
-                        @else
-                        <span class="text-slate-600">—</span>
-                        @endif
-                    </td>
-
                     {{-- DUE DATE --}}
                     <td class="px-4 py-3.5 whitespace-nowrap">
                         @if($dueDate)
@@ -217,7 +188,7 @@
                         @endif
                     </td>
 
-                    {{-- STATUS DROPDOWN — hardcoded, no nested loop --}}
+                    {{-- STATUS DROPDOWN --}}
                     <td class="px-4 py-3.5 whitespace-nowrap" onclick="event.stopPropagation()">
                         <form action="{{ route('bugs.update-status', $bug->id) }}" method="POST" class="inline">
                             @csrf
@@ -225,13 +196,14 @@
                             <select name="status" onchange="this.form.submit()"
                                     class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer outline-none border-2 transition-all"
                                     style="background:#0c0f1a;"
-                                    title="Ubah status">
-                                <option value="Open"           {{ $bug->status === 'Open'           ? 'selected' : '' }} style="background:#111827;">Open</option>
-                                <option value="In Progress"   {{ $bug->status === 'In Progress'   ? 'selected' : '' }} style="background:#111827;">In Progress</option>
+                                    title="Ubah status"
+                                    @if(in_array($bug->status, ['Resolved', 'Closed', 'Reopened'])) disabled @endif>
+                                <option value="Open" {{ $bug->status === 'Open' ? 'selected' : '' }} style="background:#111827;" disabled>Open</option>
+                                <option value="In Progress" {{ $bug->status === 'In Progress' ? 'selected' : '' }} style="background:#111827;">In Progress</option>
                                 <option value="Done in Review" {{ $bug->status === 'Done in Review' ? 'selected' : '' }} style="background:#111827;">Done in Review</option>
-                                <option value="Resolved"      {{ $bug->status === 'Resolved'      ? 'selected' : '' }} style="background:#111827;">Resolved</option>
-                                <option value="Closed"        {{ $bug->status === 'Closed'        ? 'selected' : '' }} style="background:#111827;">Closed</option>
-                                <option value="Reopened"      {{ $bug->status === 'Reopened'      ? 'selected' : '' }} style="background:#111827;">Reopened</option>
+                                @if(in_array($bug->status, ['Resolved', 'Closed', 'Reopened']))
+                                    <option value="{{ $bug->status }}" selected style="background:#111827;">{{ $bug->status }}</option>
+                                @endif
                             </select>
                         </form>
                     </td>
@@ -241,6 +213,10 @@
                         <span class="text-slate-500 font-mono text-[10px]">{{ $bug->created_at->format('d M Y') }}</span>
                     </td>
 
+                    {{-- AKSI --}}
+                    <td class="px-4 py-3.5 whitespace-nowrap text-right">
+                        <a href="{{ route('bugs.show', $bug->id) }}" class="px-3 py-1.5 bg-[#0b0f19] border border-slate-700/80 hover:bg-indigo-600/20 text-indigo-400 hover:text-indigo-300 text-[10px] font-bold rounded-lg transition">Detail</a>
+                    </td>
                 </tr>
                 @endforeach
                 @endif

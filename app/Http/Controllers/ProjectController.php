@@ -20,12 +20,15 @@ class ProjectController extends Controller
         $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
+            'status'      => 'nullable|string|max:50',
+            'test_plan'   => 'nullable|array',
         ]);
 
         Project::create([
             'name'        => $request->name,
             'description' => $request->description,
-            'status'      => 'Aktif',
+            'status'      => $request->status ?? 'Aktif',
+            'test_plan'   => $request->test_plan,
         ]);
 
         return redirect()->route('projects.index')->with('success', 'Proyek berhasil ditambahkan!');
@@ -44,13 +47,15 @@ class ProjectController extends Controller
         $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status'      => 'nullable|string',
+            'status'      => 'nullable|string|max:50',
+            'test_plan'   => 'nullable|array',
         ]);
 
         $project->update([
             'name'        => $request->name,
             'description' => $request->description,
             'status'      => $request->status ?? $project->status,
+            'test_plan'   => $request->test_plan,
         ]);
 
         return redirect()->route('projects.show', $project->id)->with('success', 'Proyek berhasil diperbarui!');

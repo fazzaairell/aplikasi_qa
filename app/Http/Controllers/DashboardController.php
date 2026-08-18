@@ -83,11 +83,24 @@ class DashboardController extends Controller
             $q->where('project_id', $request->project_id);
         })->count();
 
+        // Bug Statistics
+        $bugQuery = Bug::query();
+        if ($request->project_id) {
+            $bugQuery->whereHas('testResult.testCase.testSuite', function ($q) use ($request) {
+                $q->where('project_id', $request->project_id);
+            });
+        }
+        $totalBugs = $bugQuery->count();
+        $openBugs = $bugQuery->clone()->where('status', 'Open')->count();
+        $inProgressBugs = $bugQuery->clone()->where('status', 'In Progress')->count();
+        $closedBugs = $bugQuery->clone()->where('status', 'Closed')->count();
+
         $recentRuns = TestRun::with('project')->latest()->take(5)->get();
 
         return view('dashboard.qa', compact(
             'passed', 'failed', 'blocked', 'untested', 'total', 'recentRuns', 'projects',
-            'totalRequirements', 'totalTestSuites', 'totalTestRuns', 'totalProjects'
+            'totalRequirements', 'totalTestSuites', 'totalTestRuns', 'totalProjects',
+            'totalBugs', 'openBugs', 'inProgressBugs', 'closedBugs'
         ));
     }
 

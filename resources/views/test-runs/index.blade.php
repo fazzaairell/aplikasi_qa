@@ -18,7 +18,7 @@
     showBugModal: false,
     activeTestResultId: null,
     editForm: { id: null, title: "", status: "Active" },
-    bugForm: { bug_title: "", bug_description: "", assigned_to: "", due_date: "", attachment: null },
+    bugForm: { bug_title: "", bug_description: "", expected_result: "", assigned_to: "", due_date: "", attachment: null },
     projectsData: @json($projects),
     form: { project_id: "{{ $selectedProjectId ?? "" }}", test_suite_id: "", title: "" },
     loading: false,
@@ -76,7 +76,7 @@
     changeStatus(testResultId, status) {
         if (status === "Failed") {
             this.activeTestResultId = testResultId;
-            this.bugForm = { bug_title: "", bug_description: "", assigned_to: "", due_date: "", attachment: null };
+            this.bugForm = { bug_title: "", bug_description: "", expected_result: "", assigned_to: "", due_date: "", attachment: null };
             this.showBugModal = true;
             return;
         }
@@ -87,9 +87,10 @@
         formData.append("status", "Failed");
         formData.append("bug_title", this.bugForm.bug_title);
         formData.append("bug_description", this.bugForm.bug_description);
+        formData.append("expected_result", this.bugForm.expected_result);
         formData.append("assigned_to", this.bugForm.assigned_to);
-        formData.append("due_date", this.bugForm.due_date);   // <-- baris baru
-        
+        formData.append("due_date", this.bugForm.due_date);
+
         if (this.bugForm.attachment) {
             formData.append("attachment", this.bugForm.attachment);
         }
@@ -113,9 +114,7 @@
     }
 }'
 
-@if(auth()->user()->role !== 'QA Tester')
     <x-sidebar />
-@endif
     <!-- MAIN CONTENT -->
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
         
@@ -378,40 +377,73 @@
     </div>
 
 <!-- MODAL LAPORAN BUG KETIKA FAILED -->
-<div x-show="showBugModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
-    <div @click.away="showBugModal = false" class="bg-[#131b2e] border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[85vh] overflow-y-auto">
-        <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-                <span>Laporkan Bug (Test Case Gagal)</span>
+<div x-show="showBugModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" style="display: none;">
+    <div @click.away="showBugModal = false" class="bg-[#131b2e] border border-rose-500/20 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[90vh] overflow-y-auto" style="box-shadow: 0 0 40px rgba(239,68,68,0.15);">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse inline-block"></span>
+                Laporkan Bug — Test Case Gagal
             </h3>
-            <button @click="showBugModal = false" class="text-slate-400 hover:text-white cursor-pointer">&times;</button>
+            <button @click="showBugModal = false" class="text-slate-400 hover:text-white text-xl cursor-pointer">&times;</button>
         </div>
-        <form @submit.prevent="submitBugResult" class="space-y-4">
+        <form @submit.prevent="submitBugResult" class="space-y-3">
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Judul Bug / Kendala</label>
-                <input type="text" x-model="bugForm.bug_title" required placeholder="Contoh: Error 500 saat klik tombol submit" class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Judul Bug <span class="text-rose-400">*</span></label>
+                <input type="text" x-model="bugForm.bug_title" required
+                       placeholder="Contoh: Error 500 saat klik tombol submit"
+                       class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/60 transition">
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Deskripsi & Langkah Reproduksi</label>
-                <textarea x-model="bugForm.bug_description" rows="3" required placeholder="Jelaskan detail bug yang ditemukan..." class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Deskripsi & Langkah Reproduksi <span class="text-rose-400">*</span></label>
+                <textarea x-model="bugForm.bug_description" rows="3" required
+                          placeholder="Jelaskan detail bug yang ditemukan dan langkah untuk mereproduksinya..."
+                          class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/60 transition resize-none"></textarea>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Tugaskan Kepada (Assignee)</label>
-                <select x-model="bugForm.assigned_to" required class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Expected Result</label>
+                <textarea x-model="bugForm.expected_result" rows="2"
+                          placeholder="Apa yang seharusnya terjadi?"
+                          class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 transition resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Screenshot / Foto Bukti</label>
+                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/5 transition">
+                    <div class="flex flex-col items-center justify-center gap-1">
+                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="text-[10px] text-slate-500" x-text="bugForm.attachment ? bugForm.attachment.name : 'Klik untuk upload gambar (JPG, PNG, GIF)'"></span>
+                    </div>
+                    <input type="file" accept="image/*" class="hidden" @change="bugForm.attachment = $event.target.files[0]">
+                </label>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tugaskan ke Developer <span class="text-rose-400">*</span></label>
+                <select x-model="bugForm.assigned_to" required
+                        class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500/60 transition">
                     <option value="">-- Pilih Developer --</option>
                     @foreach($users ?? [] as $user)
+                        @if($user->role === 'Developer')
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        @endif
                     @endforeach
                 </select>
+                <p class="text-[10px] text-slate-500 mt-1">Developer yang dipilih akan mendapat notifikasi tentang bug ini.</p>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Due Date (Target Perbaikan)</label>
-                <input type="date" x-model="bugForm.due_date" required min="{{ now()->format('Y-m-d') }}" class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Perbaikan (Due Date) <span class="text-rose-400">*</span></label>
+                <input type="date" x-model="bugForm.due_date" required
+                       min="{{ now()->format('Y-m-d') }}"
+                       class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500/60 transition">
             </div>
-            <div class="flex justify-end space-x-2 pt-2">
-                <button type="button" @click="showBugModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 cursor-pointer">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs text-white font-semibold cursor-pointer">Simpan & Buat Tiket Bug</button>
+            <div class="flex justify-end gap-3 pt-2 border-t border-slate-800">
+                <button type="button" @click="showBugModal = false"
+                        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold transition cursor-pointer">Batal</button>
+                <button type="submit"
+                        class="px-5 py-2 rounded-xl text-xs text-white font-bold transition cursor-pointer shadow-lg"
+                        style="background: linear-gradient(135deg,#dc2626,#ef4444); box-shadow: 0 4px 15px rgba(239,68,68,0.3);">
+                    Simpan & Buat Tiket Bug
+                </button>
             </div>
         </form>
     </div>
