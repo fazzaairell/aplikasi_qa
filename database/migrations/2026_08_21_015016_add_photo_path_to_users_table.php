@@ -1,0 +1,24 @@
+<?php
+// Buat file ini lewat: php artisan make:migration add_photo_path_to_users_table
+// lalu isi persis seperti di bawah ini.
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('photo_path')->nullable()->after('email');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('photo_path');
+        });
+    }
+};

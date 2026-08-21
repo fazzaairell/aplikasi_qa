@@ -22,7 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // <-- Pastikan role ada di sini agar bisa diisi
+        'role',
+        'photo_path', // Foto profil pengguna
     ];
 
     /**

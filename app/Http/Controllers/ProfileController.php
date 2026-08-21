@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
@@ -29,24 +28,40 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update foto profile.
+     * Update foto profile — simpan langsung ke public/uploads/profile-photos/
+     * agar tidak perlu storage symlink (solusi Windows-safe)
      */
     public function updatePhoto(Request $request)
     {
         $request->validate([
-            'photo' => ['required', 'image', 'max:2048'], // max 2MB
+            'photo' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
         ]);
 
         $user = $request->user();
 
-        // Hapus foto lama kalau ada
+        // Hapus foto lama jika ada
         if ($user->photo_path) {
-            Storage::disk('public')->delete($user->photo_path);
+            $oldFile = public_path('uploads/' . $user->photo_path);
+            if (file_exists($oldFile)) {
+                @unlink($oldFile);
+            }
         }
 
-        $path = $request->file('photo')->store('profile-photos', 'public');
+        // Simpan file baru ke public/uploads/profile-photos/
+        $file      = $request->file('photo');
+        $filename  = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $directory = public_path('uploads/profile-photos');
 
-        $user->update(['photo_path' => $path]);
+        // Buat direktori jika belum ada
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $file->move($directory, $filename);
+
+        // Simpan path relatif saja (dari uploads/)
+        $relativePath = 'profile-photos/' . $filename;
+        $user->update(['photo_path' => $relativePath]);
 
         return back()->with('status', 'photo-updated');
     }

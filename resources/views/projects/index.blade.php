@@ -12,7 +12,7 @@
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ 
     showAddModal: false, 
     showEditModal: false, 
-    editForm: { id: '', name: '', description: '', status: 'Aktif', test_plan: '' },
+    editForm: { id: '', name: '', description: '', status: 'Aktif', test_plan: { scope: '', schedule: '', pic: '', strategy: '' } },
     sidebarOpen: false,
     collapsed: false
     
@@ -61,7 +61,7 @@
                                 <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-mono text-[11px] font-bold">PROJECT</span>
                                 <div class="flex items-center space-x-3">
                                     <a href="{{ route('projects.show', $project->id) }}" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer">Detail</a>
-                                    <button @click="showEditModal = true; editForm = { id: '{{ $project->id }}', name: '{{ $project->name }}', description: '{{ $project->description }}', status: '{{ $project->status ?? 'Aktif' }}', test_plan: '{{ str_replace("'", "\\'", $project->test_plan ?? '') }}' }" class="text-xs text-slate-400 hover:text-indigo-400 font-semibold cursor-pointer">Edit</button>
+                                    <button @click="showEditModal = true; editForm = { id: '{{ $project->id }}', name: '{{ $project->name }}', description: '{{ $project->description }}', status: '{{ $project->status ?? 'Aktif' }}', test_plan: {{ Js::from($project->test_plan ?? ['scope' => '', 'schedule' => '', 'pic' => '', 'strategy' => '']) }} }" class="text-xs text-slate-400 hover:text-indigo-400 font-semibold cursor-pointer">Edit</button>
                                     <form action="{{ route('projects.destroy', $project->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus proyek ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -114,9 +114,24 @@
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Deskripsi</label>
                     <textarea name="description" rows="3" required placeholder="Deskripsi singkat mengenai proyek..." class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Test Plan</label>
-                    <textarea name="test_plan" rows="4" placeholder="Contoh: Scope: ...&#10;Jadwal: ...&#10;PIC: ...&#10;Strategi: ..." class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
+                <div class="space-y-3 pt-1">
+                    <h3 class="text-xs font-bold text-indigo-400 border-b border-slate-800/60 pb-2">Detail Test Plan</h3>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Scope</label>
+                        <input type="text" name="test_plan[scope]" placeholder="Contoh: Modul Auth & Pembayaran" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Jadwal</label>
+                        <input type="text" name="test_plan[schedule]" placeholder="Contoh: 12 - 20 Agustus 2026" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">PIC</label>
+                        <input type="text" name="test_plan[pic]" placeholder="Contoh: John Doe" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Strategi Test</label>
+                        <input type="text" name="test_plan[strategy]" placeholder="Contoh: Manual & Automation" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-2">
                     <button type="button" @click="showAddModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
@@ -153,9 +168,24 @@
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Deskripsi</label>
                     <textarea name="description" rows="3" x-model="editForm.description" required class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Test Plan</label>
-                    <textarea name="test_plan" rows="4" x-model="editForm.test_plan" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"></textarea>
+                <div class="space-y-3 pt-1">
+                    <h3 class="text-xs font-bold text-indigo-400 border-b border-slate-800/60 pb-2">Detail Test Plan</h3>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Scope</label>
+                        <input type="text" name="test_plan[scope]" x-model="editForm.test_plan.scope" placeholder="Contoh: Modul Auth & Pembayaran" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Jadwal</label>
+                        <input type="text" name="test_plan[schedule]" x-model="editForm.test_plan.schedule" placeholder="Contoh: 12 - 20 Agustus 2026" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">PIC</label>
+                        <input type="text" name="test_plan[pic]" x-model="editForm.test_plan.pic" placeholder="Contoh: John Doe" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Strategi Test</label>
+                        <input type="text" name="test_plan[strategy]" x-model="editForm.test_plan.strategy" placeholder="Contoh: Manual & Automation" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-2">
                     <button type="button" @click="showEditModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>

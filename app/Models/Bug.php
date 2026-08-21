@@ -53,6 +53,6 @@ class Bug extends Model
     // Accessor: $bug->attachment_url
     public function getAttachmentUrlAttribute()
     {
-        return $this->attachment ? asset('storage/' . $this->attachment) : null;
+        return $this->attachment ? asset('uploads/' . $this->attachment) : null;
     }
 }

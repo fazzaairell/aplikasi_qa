@@ -8,6 +8,7 @@ use App\Models\BugNotification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class BugController extends Controller
 {
@@ -44,9 +45,10 @@ class BugController extends Controller
 
         $bugs     = $query->latest()->get();
         $projects = \App\Models\Project::where('status', '!=', 'Selesai')->get();
+        $developers = \App\Models\User::where('role', 'Developer')->get();
         $isHistory = false;
 
-        return view('bugs.index', compact('bugs', 'isHistory', 'projects'));
+        return view('bugs.index', compact('bugs', 'isHistory', 'projects', 'developers'));
     }
 
     /**
@@ -82,9 +84,75 @@ class BugController extends Controller
 
         $bugs      = $query->latest()->get();
         $projects  = \App\Models\Project::where('status', '=', 'Selesai')->get();
+        $developers = \App\Models\User::where('role', 'Developer')->get();
         $isHistory = true;
 
-        return view('bugs.index', compact('bugs', 'isHistory', 'projects'));
+        return view('bugs.index', compact('bugs', 'isHistory', 'projects', 'developers'));
+    }
+
+    /**
+     * Buat bug baru secara standalone (tanpa test result)
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title'           => 'required|string|max:255',
+            'description'     => 'required|string',
+            'expected_result' => 'nullable|string',
+            'assigned_to'     => 'required|exists:users,id',
+            'due_date'        => 'required|date',
+            'attachment'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ]);
+
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $file      = $request->file('attachment');
+            $filename  = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $directory = public_path('uploads/bug-attachments');
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            $file->move($directory, $filename);
+            $attachmentPath = 'bug-attachments/' . $filename;
+        }
+
+        $bug = Bug::create([
+            'test_result_id'  => null,
+            'title'           => $request->title,
+            'description'     => $request->description,
+            'expected_result' => $request->expected_result,
+            'status'          => 'Open',
+            'assigned_to'     => $request->assigned_to,
+            'reported_by'     => Auth::id(),
+            'due_date'        => $request->due_date,
+            'attachment'      => $attachmentPath,
+        ]);
+
+        // Notifikasi ke Developer yang di-assign
+        $reporter = Auth::user();
+        if ($bug->assigned_to) {
+            BugNotification::create([
+                'user_id' => $bug->assigned_to,
+                'bug_id'  => $bug->id,
+                'type'    => 'bug_reported',
+                'message' => "🐛 Bug baru dilaporkan oleh {$reporter->name}: \"{$bug->title}\". Segera ditangani!",
+                'is_read' => false,
+            ]);
+        }
+
+        // Notifikasi ke semua Admin
+        $admins = User::where('role', 'Admin')->get();
+        foreach ($admins as $admin) {
+            BugNotification::create([
+                'user_id' => $admin->id,
+                'bug_id'  => $bug->id,
+                'type'    => 'bug_reported',
+                'message' => "📋 Bug baru: \"{$bug->title}\" dilaporkan oleh {$reporter->name}.",
+                'is_read' => false,
+            ]);
+        }
+
+        return back()->with('success', 'Bug berhasil dilaporkan!');
     }
 
     /**

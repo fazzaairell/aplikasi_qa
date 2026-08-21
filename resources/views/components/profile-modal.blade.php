@@ -73,7 +73,7 @@
                         <template x-if="!preview">
                             <span>
                                 @if(auth()->user()->photo_path)
-                                    <img src="{{ Storage::url(auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
+                                    <img src="{{ asset('uploads/' . auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
                                 @else
                                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                                 @endif

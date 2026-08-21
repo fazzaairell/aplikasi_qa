@@ -14,10 +14,10 @@
     <!-- TOPBAR -->
     <header class="h-16 border-b sticky top-0 z-40" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
         <div class="max-w-7xl mx-auto px-8 h-full flex items-center justify-between relative">
-            <div class="flex items-center space-x-3 w-1/3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">Q</div>
-                <span class="font-bold text-lg text-white tracking-wide">QA Platform</span>
-            </div>
+        <div class="flex items-center space-x-3 w-1/3">
+            <img src="{{ asset('image/icon-aldo.png') }}" alt="Logo" class="w-9 h-9 rounded-xl object-cover">
+            <span class="font-bold text-lg text-white tracking-wide">QA Platform</span>
+        </div>
 
             <!-- DEVELOPER LINKS CENTERED -->
             <div class="hidden md:flex flex-1 justify-center space-x-2 w-1/3">
@@ -113,7 +113,7 @@
                 >
                     <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs border border-indigo-500/30 overflow-hidden">
                         @if(auth()->user()->photo_path)
-                            <img src="{{ Storage::url(auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
+                            <img src="{{ asset('uploads/' . auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         @endif

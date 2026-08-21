@@ -32,43 +32,47 @@
     style="background: #0c0f1a; border-right: 1px solid rgba(255,255,255,0.06);"
 >
     <div class="flex flex-col h-full">
-        <!-- LOGO -->
+        <!-- HEADER: LOGO + TOGGLE BUTTON -->
         <div class="p-5 flex items-center justify-between" :class="collapsed ? 'md:justify-center md:px-3' : ''">
-            <!-- Logo + Nama -->
+            
+            <!-- Kiri: Logo + Nama -->
             <div class="flex items-center space-x-3" x-show="!collapsed" x-transition>
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                     style="background: linear-gradient(135deg,#4f46e5,#7c3aed); box-shadow: 0 6px 16px rgba(79,70,229,0.3);">QA</div>
+                <img src="{{ asset('image/icon-aldo.png') }}" alt="Logo" class="w-9 h-9 rounded-xl object-cover shrink-0">
                 <span class="font-bold text-base text-white tracking-wide whitespace-nowrap">QA Platform</span>
             </div>
-            <!-- Logo saja (collapsed) -->
+
+            <!-- Kiri: Logo saja (collapsed) -->
             <div class="hidden" x-show="collapsed" x-transition>
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm"
                      style="background: linear-gradient(135deg,#4f46e5,#7c3aed);">QA</div>
             </div>
 
-            <!-- Toggle Desktop -->
-            <button @click="collapsed = !collapsed"
-                    class="hidden md:flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-white transition cursor-pointer"
-                    style="background:rgba(255,255,255,0.04);">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
+            <!-- Kanan: Tombol (Toggle Desktop & Close Mobile) -->
+            <div class="flex items-center gap-2">
+                <!-- Toggle Desktop -->
+                <button @click="collapsed = !collapsed"
+                        class="hidden md:flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-white transition cursor-pointer"
+                        style="background:rgba(255,255,255,0.04);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
 
-            <!-- Close Mobile -->
-            <button @click="$dispatch('toggle-sidebar')" class="md:hidden text-slate-400 hover:text-white cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+                <!-- Close Mobile -->
+                <button @click="$dispatch('toggle-sidebar')" class="md:hidden text-slate-400 hover:text-white cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- NAV -->
         <nav class="flex-1 px-3 space-y-0.5 mt-1 overflow-y-auto">
             @php
                 $navItems = [
-                    ['route' => (auth()->user()->role === 'QA Tester' || auth()->user()->role === 'QA Lead') ? 'dashboard.qa' : 'dashboard',        'match' => 'dashboard*',        'icon' => 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z', 'label' => 'Dashboard'],
-                    ['route' => 'projects.index',   'match' => 'projects.*',        'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z', 'label' => 'Proyek'],
+                    ['route' => (auth()->user()->role === 'QA Tester' || auth()->user()->role === 'QA Lead') ? 'dashboard.qa' : 'dashboard',        'match' => 'dashboard*',         'icon' => 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z', 'label' => 'Dashboard'],
+                    ['route' => 'projects.index',   'match' => 'projects.*',         'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z', 'label' => 'Proyek'],
                     ['route' => 'requirements.index','match' => 'requirements.*',   'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 'label' => 'Requirements'],
                     ['route' => 'test-suites.index','match' => 'test-suites.*',     'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', 'label' => 'Test Suites'],
                     ['route' => 'master-test-cases.index','match' => 'master-test-cases.*', 'icon' => 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 9h6M9 13h6', 'label' => 'Test Case'],
@@ -112,7 +116,7 @@
                     <div class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs border shrink-0 overflow-hidden"
                          style="background:rgba(99,102,241,0.15); color:#a5b4fc; border-color:rgba(99,102,241,0.3);">
                         @if(auth()->user()->photo_path)
-                            <img src="{{ Storage::url(auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
+                            <img src="{{ asset('uploads/' . auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         @endif

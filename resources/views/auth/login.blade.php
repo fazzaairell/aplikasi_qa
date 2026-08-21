@@ -60,19 +60,24 @@
 
         /* Logo mark */
         .logo-mark {
-            width: 42px; height: 42px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            width: 42px; 
+            height: 42px;
             border-radius: 12px;
-            display: flex;
+            display:flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            font-weight: 800;
-            color: white;
-            letter-spacing: -1px;
             margin-bottom: 28px;
-            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+            overflow: hidden;
+            /* Wajib agar gambar terpotong rapi mengikuti border-radius */
         }
+
+        /* Pastikan tag img di dalam logo-mark ikut menyesuaikan ukuran kotak */
+        .logo-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+
+}
 
         h1 {
             font-size: 22px;
@@ -298,7 +303,9 @@
     <div class="card">
 
         <!-- Logo -->
-        <div class="logo-mark">QA</div>
+        <div class="logo-mark">
+            <img src="{{ asset('image/icon-aldo.png') }}" alt="">
+        </div>
 
         <!-- Heading -->
         <h1>

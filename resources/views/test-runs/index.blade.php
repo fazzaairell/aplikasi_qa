@@ -7,7 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');</script>
     <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data='{ 
@@ -18,7 +20,7 @@
     showBugModal: false,
     activeTestResultId: null,
     editForm: { id: null, title: "", status: "Active" },
-    bugForm: { bug_title: "", bug_description: "", expected_result: "", assigned_to: "", due_date: "", attachment: null },
+    bugForm: { bug_title: "", bug_description: "", expected_result: "", assigned_to: "", due_date: "", attachment: null, image_url: null },
     projectsData: @json($projects),
     form: { project_id: "{{ $selectedProjectId ?? "" }}", test_suite_id: "", title: "" },
     loading: false,
@@ -76,7 +78,7 @@
     changeStatus(testResultId, status) {
         if (status === "Failed") {
             this.activeTestResultId = testResultId;
-            this.bugForm = { bug_title: "", bug_description: "", expected_result: "", assigned_to: "", due_date: "", attachment: null };
+            this.bugForm = { bug_title: "", bug_description: "", expected_result: "", assigned_to: "", due_date: "", attachment: null, image_url: null };
             this.showBugModal = true;
             return;
         }
@@ -98,21 +100,32 @@
         formData.append("_method", "PATCH");
 
         axios.post(`/test-results/${this.activeTestResultId}/update`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        })
+    headers: { 
+        "Content-Type": "multipart/form-data",
+        "Accept": "application/json"
+    }
+})
         .then(response => { window.location.reload(); })
-        .catch(error => { 
-            let errorMsg = error.response?.data?.message || "Gagal memperbarui status tes.";
-            alert(errorMsg); 
-            console.error(error);
-        });
+    .catch(error => { 
+        let errorMsg;
+        if (error.response?.status === 413) {
+            errorMsg = "Ukuran gambar terlalu besar untuk diupload ke server. Silakan gunakan gambar yang lebih kecil (maksimal 5MB) atau hubungi admin untuk menaikkan batas upload server.";
+        } else if (error.response?.status === 422) {
+            const errors = error.response.data.errors;
+            errorMsg = "Validasi gagal:\n" + Object.values(errors).flat().join("\n");
+        } else {
+            errorMsg = error.response?.data?.message || "Gagal memperbarui status tes.";
+        }
+        alert(errorMsg); 
+        console.error(error);
+    });
     },
     sendUpdateResult(testResultId, payload) {
         axios.patch(`/test-results/${testResultId}/update`, payload)
             .then(response => { window.location.reload(); })
             .catch(error => { alert("Gagal memperbarui status tes."); });
     }
-}'
+}'>
 
     <x-sidebar />
     <!-- MAIN CONTENT -->
@@ -240,9 +253,7 @@
                         </div>
 
                         <!-- MULTI-COLOR PROGRESS BAR -->
-   
-                        <!-- MULTI-COLOR PROGRESS BAR -->
-                       <div class="w-full bg-slate-900 h-1.5 flex">
+                        <div class="w-full bg-slate-900 h-1.5 flex">
                             <div
                                 class="progress-bar bg-emerald-500 h-full transition-all duration-500"
                                 data-width="{{ $passedPct }}"
@@ -263,8 +274,6 @@
                                 data-width="{{ $untestedPct }}"
                             ></div>
                         </div>
-
-              
 
                         <!-- EXPANDED TEST CASES SECTION -->
                         <div x-show="expandedRuns[{{ $run->id }}]" class="p-5 bg-[#0b0f19]/60 border-t border-slate-800/80 space-y-3" style="display: none;">
@@ -356,7 +365,7 @@
             </div>
             <form @submit.prevent="updateTestRun" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Judul Test Run</label>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Judul Test Rundfgdfs</label>
                     <input type="text" x-model="editForm.title" required placeholder="Contoh: Sprint 3 Regression Test" class="w-full px-3 py-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
@@ -376,78 +385,123 @@
         </div>
     </div>
 
-<!-- MODAL LAPORAN BUG KETIKA FAILED -->
-<div x-show="showBugModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" style="display: none;">
-    <div @click.away="showBugModal = false" class="bg-[#131b2e] border border-rose-500/20 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[90vh] overflow-y-auto" style="box-shadow: 0 0 40px rgba(239,68,68,0.15);">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse inline-block"></span>
-                Laporkan Bug — Test Case Gagal
-            </h3>
-            <button @click="showBugModal = false" class="text-slate-400 hover:text-white text-xl cursor-pointer">&times;</button>
-        </div>
-        <form @submit.prevent="submitBugResult" class="space-y-3">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Judul Bug <span class="text-rose-400">*</span></label>
-                <input type="text" x-model="bugForm.bug_title" required
-                       placeholder="Contoh: Error 500 saat klik tombol submit"
-                       class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/60 transition">
+    <!-- MODAL LAPORAN BUG KETIKA FAILED -->
+    <div x-show="showBugModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" style="display: none;">
+        <div @click.away="showBugModal = false" class="bg-[#131b2e] border border-slate-700/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 mx-4 md:mx-0 max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-white">Laporan Bug</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Isi detail bug yang ditemukan saat pengujian</p>
+                </div>
+                <button @click="showBugModal = false" class="text-slate-400 hover:text-white transition cursor-pointer p-1 rounded-lg hover:bg-white/5">&times;</button>
             </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Deskripsi & Langkah Reproduksi <span class="text-rose-400">*</span></label>
-                <textarea x-model="bugForm.bug_description" rows="3" required
-                          placeholder="Jelaskan detail bug yang ditemukan dan langkah untuk mereproduksinya..."
-                          class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/60 transition resize-none"></textarea>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Expected Result</label>
-                <textarea x-model="bugForm.expected_result" rows="2"
-                          placeholder="Apa yang seharusnya terjadi?"
-                          class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 transition resize-none"></textarea>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Screenshot / Foto Bukti</label>
-                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/5 transition">
-                    <div class="flex flex-col items-center justify-center gap-1">
-                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <span class="text-[10px] text-slate-500" x-text="bugForm.attachment ? bugForm.attachment.name : 'Klik untuk upload gambar (JPG, PNG, GIF)'"></span>
+
+            <!-- Divider -->
+            <div class="border-t border-slate-800/80"></div>
+
+            <div class="space-y-4" x-data="{ previewUrl: null }">
+                <!-- Judul Bug -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Judul Bug <span class="text-rose-400">*</span></label>
+                    <input type="text" x-model="bugForm.bug_title" required
+                           placeholder="Contoh: Button submit tidak merespons saat diklik"
+                           class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+
+                <!-- Deskripsi -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Deskripsi Bug <span class="text-rose-400">*</span></label>
+                    <textarea x-model="bugForm.bug_description" required rows="3"
+                              placeholder="Jelaskan langkah-langkah yang menyebabkan bug terjadi..."
+                              class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- Expected Result -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Expected Result</label>
+                    <textarea x-model="bugForm.expected_result" rows="2"
+                              placeholder="Apa yang seharusnya terjadi setelah aksi tersebut?"
+                              class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- Row: Assign + Due Date -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Assign ke Developer <span class="text-rose-400">*</span></label>
+                        <select x-model="bugForm.assigned_to" required
+                                class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition">
+                            <option value="">-- Pilih Developer --</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <input type="file" accept="image/*" class="hidden" @change="bugForm.attachment = $event.target.files[0]">
-                </label>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Due Date <span class="text-rose-400">*</span></label>
+                        <input type="date" x-model="bugForm.due_date" required
+                               class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition">
+                    </div>
+                </div>
+
+                <!-- Upload Screenshot/Attachment -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Screenshot / Lampiran</label>
+                    <div class="relative">
+                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/5 transition"
+                               x-show="!previewUrl">
+                            <div class="flex flex-col items-center gap-2 text-slate-500">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span class="text-[11px] font-medium">Klik untuk upload gambar</span>
+                                <span class="text-[10px]">JPG, PNG, GIF • Maks. 5MB</span>
+                            </div>
+                            <input type="file" accept="image/*" class="hidden"
+                                   @change="
+                                       const file = $event.target.files[0];
+                                       if (file) {
+                                           bugForm.attachment = file;
+                                           previewUrl = URL.createObjectURL(file);
+                                       }
+                                   ">
+                        </label>
+
+                        <!-- Preview Gambar -->
+                        <div x-show="previewUrl" class="relative rounded-xl overflow-hidden border border-slate-700">
+                            <img :src="previewUrl" alt="Preview" class="w-full h-40 object-cover">
+                            <button type="button"
+                                    @click="previewUrl = null; bugForm.attachment = null;"
+                                    class="absolute top-2 right-2 w-7 h-7 rounded-full bg-rose-500/90 hover:bg-rose-500 text-white flex items-center justify-center text-xs transition cursor-pointer">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
+                    <button type="button" @click="showBugModal = false"
+                            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 cursor-pointer transition">
+                        Batal
+                    </button>
+                    <button type="button"
+                            @click="submitBugResult()"
+                            :disabled="!bugForm.bug_title || !bugForm.bug_description || !bugForm.assigned_to || !bugForm.due_date"
+                            class="px-5 py-2 rounded-xl text-xs text-white font-semibold transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            style="background: linear-gradient(135deg,#dc2626,#b91c1c); box-shadow:0 4px 12px rgba(220,38,38,0.3);">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            Laporkan Bug
+                        </span>
+                    </button>
+                </div>
             </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tugaskan ke Developer <span class="text-rose-400">*</span></label>
-                <select x-model="bugForm.assigned_to" required
-                        class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500/60 transition">
-                    <option value="">-- Pilih Developer --</option>
-                    @foreach($users ?? [] as $user)
-                        @if($user->role === 'Developer')
-                        <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endif
-                    @endforeach
-                </select>
-                <p class="text-[10px] text-slate-500 mt-1">Developer yang dipilih akan mendapat notifikasi tentang bug ini.</p>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Perbaikan (Due Date) <span class="text-rose-400">*</span></label>
-                <input type="date" x-model="bugForm.due_date" required
-                       min="{{ now()->format('Y-m-d') }}"
-                       class="w-full px-3 py-2.5 bg-[#0b0f19] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500/60 transition">
-            </div>
-            <div class="flex justify-end gap-3 pt-2 border-t border-slate-800">
-                <button type="button" @click="showBugModal = false"
-                        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold transition cursor-pointer">Batal</button>
-                <button type="submit"
-                        class="px-5 py-2 rounded-xl text-xs text-white font-bold transition cursor-pointer shadow-lg"
-                        style="background: linear-gradient(135deg,#dc2626,#ef4444); box-shadow: 0 4px 15px rgba(239,68,68,0.3);">
-                    Simpan & Buat Tiket Bug
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
+
 <script>
 document.querySelectorAll('.progress-bar').forEach(function (bar) {
     bar.style.width = bar.dataset.width + '%';

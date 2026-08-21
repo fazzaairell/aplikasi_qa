@@ -127,9 +127,11 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     // 5. Bug Tracker
     Route::get('/bugs', [BugController::class, 'index'])->name('bugs.index');
+    Route::post('/bugs', [BugController::class, 'store'])->name('bugs.store');
     Route::get('/bugs/history', [BugController::class, 'history'])->name('bugs.history');
     Route::get('/bugs/{id}', [BugController::class, 'show'])->name('bugs.show');
     Route::patch('/bugs/{id}/status', [BugController::class, 'updateStatus'])->name('bugs.update-status');
+
 
     // 6. Notifikasi
     Route::get('/notifications/timeline', [NotificationController::class, 'timeline'])->name('notifications.timeline');

@@ -102,7 +102,14 @@ class TestRunController extends Controller
         if ($request->status === 'Failed') {
             $attachmentPath = null;
             if ($request->hasFile('attachment')) {
-                $attachmentPath = $request->file('attachment')->store('bug-attachments', 'public');
+                $file      = $request->file('attachment');
+                $filename  = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $directory = public_path('uploads/bug-attachments');
+                if (!is_dir($directory)) {
+                    mkdir($directory, 0755, true);
+                }
+                $file->move($directory, $filename);
+                $attachmentPath = 'bug-attachments/' . $filename;
             }
 
             $bug = Bug::create([

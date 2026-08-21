@@ -37,9 +37,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <div>
-                    <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase">Overview</div>
-                    <div class="text-sm font-bold text-white">Dashboard Admin</div>
+                <div class="mb-4">
+                    <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase pt-5">Overview</div>
+                    <div class="text-sm font-bold text-white ">Dashboard Admin</div>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -132,7 +132,15 @@
                             $passed  = $run->testResults->where('status','Passed')->count();
                             $failed  = $run->testResults->where('status','Failed')->count();
                             $blocked = $run->testResults->where('status','Blocked')->count();
+                            $untested = $total - $passed - $failed - $blocked;
                             $pct     = $total > 0 ? round(($passed / $total) * 100) : 0;
+
+                            // Nilai style dihitung dulu di sini supaya atribut style="" di bawah
+                            // hanya berisi variabel polos (tidak ada tanda kutip/ternary di dalamnya)
+                            $runDotColor  = $run->status === 'Active' ? '#10b981' : '#64748b';
+                            $passedWidth  = $total > 0 ? round($passed / $total * 100) : 0;
+                            $failedWidth  = $total > 0 ? round($failed / $total * 100) : 0;
+                            $blockedWidth = $total > 0 ? round($blocked / $total * 100) : 0;
                         @endphp
                         <div class="rounded-xl p-4 space-y-3" style="background:#0c0f1a; border:1px solid rgba(255,255,255,0.05);">
                             <div class="flex items-start justify-between">
@@ -141,7 +149,7 @@
                                     <div class="text-[11px] text-slate-500">{{ $run->project->name ?? '—' }}</div>
                                 </div>
                                 <span class="w-2 h-2 rounded-full mt-1.5 shrink-0"
-                                      style="background: {{ $run->status === 'Active' ? '#10b981' : '#64748b' }};"></span>
+                                      style="background:{{ $runDotColor }};"></span>
                             </div>
                             <div class="flex flex-wrap gap-2 text-[11px] font-bold">
                                 <span class="text-emerald-400">{{ $passed }} Passed</span>
@@ -152,16 +160,16 @@
                                 <span class="text-amber-400">{{ $blocked }} Blocked</span>
                                 @endif
                                 <span class="text-slate-600">•</span>
-                                <span class="text-slate-400">{{ $total - $passed - $failed - $blocked }} Untested</span>
+                                <span class="text-slate-400">{{ $untested }} Untested</span>
                             </div>
                             <div class="w-full h-1.5 rounded-full overflow-hidden flex" style="background:#1e293b;">
                                 @if($total > 0)
-                                <div class="h-full bg-emerald-500" style="width:{{ round($passed/$total*100) }}%"></div>
-                                <div class="h-full bg-rose-500"    style="width:{{ round($failed/$total*100) }}%"></div>
-                                <div class="h-full bg-amber-500"   style="width:{{ round($blocked/$total*100) }}%"></div>
+                                <div class="h-full bg-emerald-500" style="width:{{ $passedWidth }}%"></div>
+                                <div class="h-full bg-rose-500"    style="width:{{ $failedWidth }}%"></div>
+                                <div class="h-full bg-amber-500"   style="width:{{ $blockedWidth }}%"></div>
                                 @endif
                             </div>
-                            <div class="text-[10px] text-slate-500">{{ $pct }}% selesai · {{ $total - $passed - $failed - $blocked }} belum dieksekusi</div>
+                            <div class="text-[10px] text-slate-500">{{ $pct }}% selesai · {{ $untested }} belum dieksekusi</div>
                         </div>
                         @empty
                         <div class="rounded-xl p-8 text-center" style="background:#0c0f1a; border:1px solid rgba(255,255,255,0.05);">
@@ -190,16 +198,21 @@
                                 'Reopened'    => ['bg'=>'rgba(168,85,247,0.1)','text'=>'#d8b4fe','border'=>'rgba(168,85,247,0.2)'],
                             ];
                             $sc = $statusColors[$bug->status] ?? $statusColors['Open'];
+
+                            // Pecah array jadi variabel polos untuk dipakai di style=""
+                            $scBg     = $sc['bg'];
+                            $scText   = $sc['text'];
+                            $scBorder = $sc['border'];
                         @endphp
                         <div class="rounded-xl p-3 space-y-2" style="background:#0c0f1a; border:1px solid rgba(255,255,255,0.05);">
                             <div class="flex items-start gap-2">
                                 <span class="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-                                      style="background:{{ $sc['text'] }};"></span>
+                                      style="background:{{ $scText }};"></span>
                                 <span class="text-xs font-semibold text-white leading-snug line-clamp-2">{{ $bug->title }}</span>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                                      style="background:{{ $sc['bg'] }};color:{{ $sc['text'] }};border:1px solid {{ $sc['border'] }};">
+                                      style="background:{{ $scBg }};color:{{ $scText }};border:1px solid {{ $scBorder }};">
                                     {{ $bug->status }}
                                 </span>
                             </div>

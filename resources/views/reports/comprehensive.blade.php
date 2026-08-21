@@ -21,9 +21,9 @@
         
         <div class="flex-1">
             <!-- Header -->
-            <div class="bg-[#1a1f2e] border-b border-slate-800">
+            <div class=" border-b border-slate-800">
                 <div class="max-w-7xl mx-auto px-6 py-8">
-                    <h1 class="text-3xl font-bold text-white mb-2">📊 Comprehensive Reports</h1>
+                    <h1 class="text-3xl font-bold text-white mb-2">Comprehensive Reports</h1>
                     <p class="text-slate-400">Analisis mendalam tentang status testing, bug, dan kualitas proyek</p>
                 </div>
             </div>
@@ -32,7 +32,7 @@
             <div class="max-w-7xl mx-auto px-6 py-6">
                 <form method="GET" class="inline-block">
                     <select name="project_id" onchange="this.form.submit()" class="px-4 py-2 bg-[#1a1f2e] border border-indigo-500/20 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
-                        <option value="">📁 Semua Proyek</option>
+                        <option value="">Semua Proyek</option>
                         @foreach($projects as $p)
                             <option value="{{ $p->id }}" {{ request('project_id') == $p->id ? 'selected' : '' }}>
                                 {{ $p->name }}
@@ -49,8 +49,7 @@
                     <!-- Pass Rate -->
                     <div class="bg-[#1a1f2e] border border-slate-800 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs text-slate-400 font-medium">Pass Rate</span>
-                            <span class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 text-sm">✅</span>
+                            <span class="text-xs text-slate-400 font-medium">Pass Rate
                         </div>
                         <div class="text-4xl font-extrabold text-green-400">{{ $passRate }}%</div>
                         <div class="text-xs text-slate-500 mt-2">{{ $resultsByStatus['Passed'] }} / {{ $totalResults }} passed</div>
@@ -60,7 +59,6 @@
                     <div class="bg-[#1a1f2e] border border-slate-800 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs text-slate-400 font-medium">Total Bugs</span>
-                            <span class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 text-sm">🐛</span>
                         </div>
                         <div class="text-4xl font-extrabold text-rose-400">{{ $totalBugs }}</div>
                         <div class="text-xs text-slate-500 mt-2">{{ $bugsByStatus['Open'] }} open, {{ $bugsByStatus['In Progress'] }} in progress</div>
@@ -70,7 +68,6 @@
                     <div class="bg-[#1a1f2e] border border-slate-800 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs text-slate-400 font-medium">Test Runs</span>
-                            <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-sm">▶️</span>
                         </div>
                         <div class="text-4xl font-extrabold text-indigo-400">{{ $totalRuns }}</div>
                         <div class="text-xs text-slate-500 mt-2">{{ $activeRuns }} active, {{ $completedRuns }} completed</div>
@@ -80,7 +77,6 @@
                     <div class="bg-[#1a1f2e] border border-slate-800 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs text-slate-400 font-medium">Avg Bugs/Run</span>
-                            <span class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 text-sm">📈</span>
                         </div>
                         <div class="text-4xl font-extrabold text-orange-400">{{ $avgBugsPerRun }}</div>
                         <div class="text-xs text-slate-500 mt-2">Quality metric</div>
@@ -151,7 +147,7 @@
                     <!-- Recent Bugs -->
                     <div class="bg-[#1a1f2e] border border-slate-800 rounded-2xl overflow-hidden">
                         <div class="p-6 border-b border-slate-800">
-                            <h2 class="text-lg font-semibold text-white">🐛 Recent Bugs</h2>
+                            <h2 class="text-lg font-semibold text-white"> Recent Bugs</h2>
                         </div>
                         <div class="divide-y divide-slate-800/60">
                             @forelse($recentBugs as $bug)

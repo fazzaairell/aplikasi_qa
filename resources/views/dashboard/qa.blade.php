@@ -24,27 +24,6 @@
 <!-- MAIN CONTENT -->
 <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full">
 
-    <!-- TOPBAR -->
-    <header class="h-16 border-b border-white/[0.06] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30"
-            style="background:rgba(12,15,26,0.85); backdrop-filter:blur(12px);">
-        <div class="flex items-center gap-3">
-            <button @click="$dispatch('toggle-sidebar')"
-                    class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white border border-white/[0.06] cursor-pointer"
-                    style="background:#111827;">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-            <div>
-                <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase">Overview</div>
-                <div class="text-sm font-bold text-white">Dashboard QA Tester</div>
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-[11px] text-slate-500">{{ now()->translatedFormat('d F Y') }}</span>
-        </div>
-    </header>
-
     <div class="p-8 space-y-6 fade-in max-w-7xl mx-auto w-full">
 
         <div class="mb-8">
@@ -101,7 +80,7 @@
                 </div>
                 <div class="text-3xl font-extrabold text-white">{{ $totalBugs }}</div>
                 <div class="text-xs font-semibold text-slate-300 mt-1">Bugs</div>
-                <div class="text-[10px] text-rose-400 mt-2 font-medium">Lihat bugs &rarr;</div>
+                <div class="text-[10px] text-rose-400 mt-2 font-medium">Lihat riwayat bug &rarr;</div>
             </a>
 
             <a href="{{ route('projects.index') }}" class="group bg-gradient-to-br from-[#111827] to-[#0c0f1a] border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden hover:border-purple-500/50 hover:bg-[#1f2937] transition duration-300">
@@ -112,48 +91,6 @@
                 <div class="text-xs font-semibold text-slate-300 mt-1">Projects</div>
                 <div class="text-[10px] text-purple-400 mt-2 font-medium">Lihat projects &rarr;</div>
             </a>
-        </div>
-
-        <!-- BUG STATISTICS -->
-        <div class="bg-[#111827] border border-slate-800/80 rounded-2xl overflow-hidden">
-            <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
-                <span class="text-sm font-bold text-white">📊 Status Bug</span>
-                <a href="{{ route('report.bug-history') }}" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Lihat detail &rarr;</a>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 p-5">
-                <div class="bg-[#0c0f1a] border border-slate-800/60 rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-slate-400">Open</span>
-                        <span class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 text-xs font-bold">⚠️</span>
-                    </div>
-                    <div class="text-2xl font-extrabold text-white">{{ $openBugs }}</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Menunggu assignment</div>
-                </div>
-                <div class="bg-[#0c0f1a] border border-slate-800/60 rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-slate-400">In Progress</span>
-                        <span class="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-400 text-xs font-bold">⏳</span>
-                    </div>
-                    <div class="text-2xl font-extrabold text-white">{{ $inProgressBugs }}</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Sedang dikerjakan</div>
-                </div>
-                <div class="bg-[#0c0f1a] border border-slate-800/60 rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-slate-400">Closed</span>
-                        <span class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 text-xs font-bold">✅</span>
-                    </div>
-                    <div class="text-2xl font-extrabold text-white">{{ $closedBugs }}</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Selesai</div>
-                </div>
-                <div class="bg-[#0c0f1a] border border-slate-800/60 rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-slate-400">Total</span>
-                        <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xs font-bold">🐛</span>
-                    </div>
-                    <div class="text-2xl font-extrabold text-white">{{ $totalBugs }}</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Total bugs</div>
-                </div>
-            </div>
         </div>
 
         <!-- TEST RUN TERBARU -->

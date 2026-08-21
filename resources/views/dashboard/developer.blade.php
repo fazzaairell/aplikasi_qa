@@ -27,9 +27,7 @@
     .filter-scroll::-webkit-scrollbar { display: none; }
 </style>
 
-{{-- ═══════════════════════════════════════════════
-     STAT CARDS (gaya sama persis kayak bugs/index)
-════════════════════════════════════════════════ --}}
+
 @php
     $countOpen     = $bugs->where('status', 'Open')->count();
     $countProgress = $bugs->where('status', 'In Progress')->count();

@@ -27,7 +27,7 @@
         tr.bug-row:hover td { background: rgba(99,102,241,0.04); }
     </style>
 </head>
-<body class="h-full text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false }">
+<body class="h-full text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false, showLaporanModal: {{ $errors->any() || session('success') ? 'true' : 'false' }} }">
 
 {{-- ═══ SIDEBAR (Admin & QA Tester) ═══ --}}
 @if(auth()->user()->role !== 'Developer')
@@ -122,7 +122,7 @@
                 <button type="button" @click="$dispatch('open-profile-modal')" class="flex items-center space-x-3 cursor-pointer text-left" title="Buka profil">
                     <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs border border-indigo-500/30 overflow-hidden">
                         @if(auth()->user()->photo_path)
-                            <img src="{{ Storage::url(auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
+                            <img src="{{ asset('uploads/' . auth()->user()->photo_path) }}" class="w-full h-full object-cover" alt="Foto profil">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         @endif
@@ -168,6 +168,7 @@
 
                 @if(auth()->user()->role !== 'Developer')
                 <button id="btn-laporan-bug"
+                    @click="showLaporanModal = true"
                     class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition shadow-lg cursor-pointer"
                     style="background: linear-gradient(135deg,#4f46e5,#6366f1); box-shadow: 0 8px 20px rgba(79,70,229,0.25);"
                     onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
@@ -388,6 +389,146 @@
 </div>
 
 <x-profile-modal />
+
+{{-- ═══ MODAL LAPORAN BUG ═══ --}}
+@if(auth()->user()->role !== 'Developer')
+<div x-show="showLaporanModal"
+     x-cloak
+     class="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+     style="display:none;"
+     @keydown.escape.window="showLaporanModal = false">
+    <div @click.away="showLaporanModal = false"
+         class="bg-[#111827] border border-white/[0.08] rounded-2xl w-full max-w-lg shadow-2xl mx-4 max-h-[92vh] overflow-y-auto">
+
+        {{-- Modal Header --}}
+        <div class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+            <div>
+                <h3 class="text-sm font-bold text-white">Laporan Bug Baru</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Laporkan bug yang ditemukan langsung ke Bug Tracker</p>
+            </div>
+            <button @click="showLaporanModal = false"
+                    type="button"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        {{-- Form --}}
+        <form action="{{ route('bugs.store') }}" method="POST" enctype="multipart/form-data"
+              x-data="{ previewUrl: null }" class="px-6 py-5 space-y-4">
+            @csrf
+
+            {{-- Flash success --}}
+            @if(session('success'))
+            <div class="px-4 py-3 rounded-xl text-xs font-semibold text-emerald-300" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);">
+                ✅ {{ session('success') }}
+            </div>
+            @endif
+
+            {{-- Judul Bug --}}
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Judul Bug <span class="text-rose-400">*</span></label>
+                <input type="text" name="title" required value="{{ old('title') }}"
+                       placeholder="Contoh: Tombol submit tidak merespons"
+                       class="w-full px-3 py-2.5 bg-[#0c0f1a] border border-white/[0.1] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                @error('title')<span class="text-xs text-rose-400">{{ $message }}</span>@enderror
+            </div>
+
+            {{-- Deskripsi --}}
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Deskripsi Bug <span class="text-rose-400">*</span></label>
+                <textarea name="description" required rows="3"
+                          placeholder="Jelaskan langkah-langkah reproduksi bug..."
+                          class="w-full px-3 py-2.5 bg-[#0c0f1a] border border-white/[0.1] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition resize-none">{{ old('description') }}</textarea>
+                @error('description')<span class="text-xs text-rose-400">{{ $message }}</span>@enderror
+            </div>
+
+            {{-- Expected Result --}}
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Expected Result</label>
+                <textarea name="expected_result" rows="2"
+                          placeholder="Apa yang seharusnya terjadi?"
+                          class="w-full px-3 py-2.5 bg-[#0c0f1a] border border-white/[0.1] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition resize-none">{{ old('expected_result') }}</textarea>
+            </div>
+
+            {{-- Assign + Due Date --}}
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Assign ke Developer <span class="text-rose-400">*</span></label>
+                    <select name="assigned_to" required
+                            class="w-full px-3 py-2.5 bg-[#0c0f1a] border border-white/[0.1] rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition">
+                        <option value="">-- Pilih Developer --</option>
+                        @foreach($developers as $dev)
+                            <option value="{{ $dev->id }}" {{ old('assigned_to') == $dev->id ? 'selected' : '' }}>{{ $dev->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('assigned_to')<span class="text-xs text-rose-400">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Due Date <span class="text-rose-400">*</span></label>
+                    <input type="date" name="due_date" required value="{{ old('due_date') }}"
+                           class="w-full px-3 py-2.5 bg-[#0c0f1a] border border-white/[0.1] rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition">
+                    @error('due_date')<span class="text-xs text-rose-400">{{ $message }}</span>@enderror
+                </div>
+            </div>
+
+            {{-- Upload Screenshot --}}
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Screenshot / Lampiran</label>
+                <div class="relative">
+                    {{-- Drop zone --}}
+                    <label x-show="!previewUrl"
+                           class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/[0.12] rounded-xl cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/5 transition">
+                        <div class="flex flex-col items-center gap-2 text-slate-500">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span class="text-[11px] font-medium">Klik untuk upload gambar</span>
+                            <span class="text-[10px] text-slate-600">JPG, PNG, GIF, WEBP • Maks. 5MB</span>
+                        </div>
+                        <input type="file" name="attachment" accept="image/*" class="hidden"
+                               @change="
+                                   const file = $event.target.files[0];
+                                   if (file) previewUrl = URL.createObjectURL(file);
+                               ">
+                    </label>
+
+                    {{-- Preview gambar --}}
+                    <div x-show="previewUrl" class="relative rounded-xl overflow-hidden border border-white/[0.08]">
+                        <img :src="previewUrl" alt="Preview" class="w-full h-40 object-cover">
+                        <button type="button"
+                                @click="previewUrl = null; $el.closest('form').querySelector('input[type=file]').value = '';"
+                                class="absolute top-2 right-2 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center text-sm transition cursor-pointer shadow-lg">
+                            &times;
+                        </button>
+                        <div class="absolute bottom-0 inset-x-0 px-3 py-1.5 text-[10px] text-white" style="background:rgba(0,0,0,0.5)">
+                            <span x-text="previewUrl ? 'Gambar siap diupload' : ''"></span>
+                        </div>
+                    </div>
+                </div>
+                @error('attachment')<span class="text-xs text-rose-400">{{ $message }}</span>@enderror
+            </div>
+
+            {{-- Actions --}}
+            <div class="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
+                <button type="button" @click="showLaporanModal = false"
+                        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 cursor-pointer transition">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 rounded-xl text-xs text-white font-semibold transition cursor-pointer flex items-center gap-1.5"
+                        style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,0.3);">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    Laporkan Bug
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
 
 <script>
     function colorStatusSelects() {
