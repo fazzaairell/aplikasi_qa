@@ -77,6 +77,7 @@ class TestRunController extends Controller
 
     public function updateResult(Request $request, int $testResultId)
     {
+
         $request->validate([
             'status'          => 'required|in:Passed,Failed,Blocked,Untested',
             'bug_title'       => 'required_if:status,Failed|nullable|string|max:255',
@@ -87,9 +88,10 @@ class TestRunController extends Controller
             'attachment'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
+
+
         $testResult = TestResult::with(['testCase.testSuite.project'])->findOrFail($testResultId);
         $reporter   = Auth::user();
-
         // ── Update status test result ─────────────────────────────────────
         $testResult->update([
             'status'      => $request->status,

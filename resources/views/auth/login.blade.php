@@ -297,14 +297,18 @@
         .subtitle-anim { opacity: 0; animation: fadeWord 0.4s ease 0.45s forwards; }
         .form-anim { opacity: 0; animation: fadeWord 0.4s ease 0.2s forwards; }
     </style>
+
 </head>
 <body>
 
     <div class="card">
 
-        <!-- Logo -->
-        <div class="logo-mark">
-            <img src="{{ asset('image/icon-aldo.png') }}" alt="">
+        <!-- Logo & Brand -->
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 28px;">
+            <div class="logo-mark" style="margin-bottom: 0;">
+                <img src="{{ asset('image/icon-aldo.png') }}" alt="Logo">
+            </div>
+            <span style="color: #f8fafc; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">Alkindo</span>
         </div>
 
         <!-- Heading -->

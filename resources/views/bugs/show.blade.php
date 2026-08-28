@@ -16,6 +16,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.35s ease both; }
     </style>
+
 </head>
 <body class="h-full text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false }">
 

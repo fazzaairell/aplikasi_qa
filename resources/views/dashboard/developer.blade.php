@@ -193,7 +193,7 @@
                             @method('PATCH')
                             <select name="status" onchange="this.form.submit()"
                                     class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer outline-none border-2 transition-all"
-                                    style="background:#0c0f1a;"
+                                    class="bg-[#0c0f1a]"
                                     title="Ubah status"
                                     @if(in_array($bug->status, ['Resolved', 'Closed', 'Reopened'])) disabled @endif>
                                 <option value="Open" {{ $bug->status === 'Open' ? 'selected' : '' }} style="background:#111827;" disabled>Open</option>

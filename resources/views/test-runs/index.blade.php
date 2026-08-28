@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');</script>
     <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
+
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data='{ 
     sidebarOpen: false, 
@@ -129,7 +130,7 @@
 
     <x-sidebar />
     <!-- MAIN CONTENT -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" class="bg-[#0c0f1a]">
         
         <!-- TOPBAR -->
         <header class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
@@ -138,7 +139,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <div class="w-32 sm:w-48 md:w-96">
-                    <input type="text" placeholder="Cari test run..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari test run..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -183,7 +184,7 @@
                         $untestedPct = $total > 0 ? ($untested / $total) * 100 : 0;
                     @endphp
 
-                    <div class="bg-[#131b2e] border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="data-item bg-[#131b2e] border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
                         <!-- CARD HEADER -->
                         <div class="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div class="flex items-start space-x-3">
@@ -193,8 +194,7 @@
                                 <div class="space-y-1">
                                     <div class="flex items-center space-x-2 flex-wrap">
                                         <h2 class="text-sm font-bold text-white">{{ $run->title }}</h2>
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold 
-                                            {{ $run->status === 'Active' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }}">
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $run->status === 'Active' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }}">
                                             {{ $run->status }}
                                         </span>
                                     </div>

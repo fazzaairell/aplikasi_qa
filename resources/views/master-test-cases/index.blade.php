@@ -8,14 +8,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
+
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ showAddModal: false }">
     <x-sidebar />
-<div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
+<div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" class="bg-[#0c0f1a]">
     <header class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
         <div class="flex items-center space-x-4">
             <div class="w-32 sm:w-48 md:w-96">
-                <input type="text" placeholder="Cari master test case..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari master test case..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
             </div>
         </div>
         <div class="flex items-center space-x-4">
@@ -59,7 +60,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-800/60 text-xs">
                     @forelse($masterTestCases as $case)
-                        <tr class="hover:bg-slate-800/30 transition align-top">
+                        <tr class="data-item hover:bg-slate-800/30 transition align-top">
                             <td class="py-4 px-6 text-slate-200 font-semibold">{{ $case->title }}</td>
                             <td class="py-4 px-6 text-slate-300">{{ $case->requirement?->code ?? '-' }}</td>
                             <td class="py-4 px-6">
@@ -141,5 +142,15 @@
         </form>
     </div>
 </div>
+<script>
+    function filterData() {
+        const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.data-item');
+        items.forEach(item => {
+            const match = search === '' || item.innerText.toLowerCase().includes(search);
+            item.style.display = match ? '' : 'none';
+        });
+    }
+</script>
 </body>
 </html>

@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
+
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ 
     showAddSuiteModal: false, 
@@ -21,7 +22,7 @@
 
     <x-sidebar />
     <!-- MAIN CONTENT -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" class="bg-[#0c0f1a]">
         
         <!-- TOPBAR -->
         <header class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
@@ -30,7 +31,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <div class="w-32 sm:w-48 md:w-96">
-                    <input type="text" placeholder="Cari proyek, test case, bug..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari proyek, test case, bug..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -61,7 +62,7 @@
                 <!-- DAFTAR PROYEK (GRID) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @forelse($projects as $p)
-                        <a href="{{ route('test-suites.index', ['project_id' => $p->id]) }}" class="block p-6 rounded-2xl bg-[#131b2e] border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/50 transition group shadow-xl">
+                        <a href="{{ route('test-suites.index', ['project_id' => $p->id]) }}" class="data-item block p-6 rounded-2xl bg-[#131b2e] border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/50 transition group shadow-xl">
                             <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 mb-2">{{ $p->name }}</h3>
                             <p class="text-xs text-slate-400 mb-4">{{ Str::limit($p->description, 80) ?: 'Tidak ada deskripsi' }}</p>
                             <div class="flex items-center justify-between text-[11px] font-semibold">
@@ -90,7 +91,7 @@
             <!-- LIST TEST SUITES & TEST CASES (ACCORDION) -->
             <div class="space-y-4">
                 @forelse($testSuites as $suite)
-                    <div class="bg-[#131b2e] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl" x-data="{ open: true }">
+                    <div class="data-item bg-[#131b2e] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl" x-data="{ open: false }">
                         
                         <!-- SUITE HEADER -->
                         <div @click="open = !open" class="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 transition">
@@ -166,7 +167,7 @@
                                                         'Critical' => 'text-rose-400',
                                                         'High' => 'text-amber-400',
                                                         'Medium' => 'text-indigo-400',
-                                                        default => 'text-slate-400'
+                                                        default => 'text-slate-400 '
                                                     };
                                                 @endphp
                                                 <span class="font-semibold {{ $pColor }}">&uarr; {{ $tc->priority }}</span>
@@ -178,7 +179,7 @@
                                                         'Passed' => 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
                                                         'Failed' => 'bg-red-500/10 border-red-500/20 text-red-400',
                                                         'Blocked' => 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-                                                        default => 'bg-slate-700/20 border-slate-700 text-slate-400'
+                                                        default => 'bg-slate-700/20 border-slate-700 text-slate-400 '
                                                     };
                                                 @endphp
                                                 <span class="px-2.5 py-1 rounded-full border text-[10px] font-bold {{ $sBadge }}">
@@ -334,5 +335,16 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function filterData() {
+            const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+            const items = document.querySelectorAll('.data-item');
+            items.forEach(item => {
+                const match = search === '' || item.innerText.toLowerCase().includes(search);
+                item.style.display = match ? '' : 'none';
+            });
+        }
+    </script>
 </body>
 </html>

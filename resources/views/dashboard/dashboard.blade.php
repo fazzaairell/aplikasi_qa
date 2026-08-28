@@ -18,6 +18,7 @@
         .stat-card { transition: transform 0.2s, border-color 0.2s; }
         .stat-card:hover { transform: translateY(-2px); }
     </style>
+
 </head>
 <body class="h-full text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false }">
 
@@ -39,7 +40,7 @@
                 </button>
                 <div class="mb-4">
                     <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase pt-5">Overview</div>
-                    <div class="text-sm font-bold text-white ">Dashboard Admin</div>
+                    <div class="text-sm font-bold text-white">Dashboard Admin</div>
                 </div>
             </div>
             <div class="flex items-center gap-2">

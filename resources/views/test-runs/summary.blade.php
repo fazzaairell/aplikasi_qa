@@ -24,6 +24,7 @@
             .verdict-notready { background: #fee2e2 !important; color: #b91c1c !important; }
         }
     </style>
+
 </head>
 <body class="min-h-full text-slate-100">
 

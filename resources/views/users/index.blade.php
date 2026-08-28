@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
+
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ 
     showModal: false, 
@@ -20,7 +21,7 @@
 <x-sidebar />
 
     <!-- MAIN CONTENT -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" style="background:#0c0f1a;">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full" class="bg-[#0c0f1a]">
         
         <!-- TOPBAR -->
         <header class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30" style="background:rgba(12,15,26,.85);backdrop-filter:blur(12px);border-color:rgba(255,255,255,.06);">
@@ -29,7 +30,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <div class="w-32 sm:w-48 md:w-96">
-                    <input type="text" placeholder="Cari proyek, test case, bug..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari pengguna..." class="w-full px-4 py-2 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -93,13 +94,13 @@
                                 'QA Lead' => 'bg-blue-500/10 text-blue-400 border border-blue-500/30',
                                 'QA Tester' => 'bg-teal-500/10 text-teal-400 border border-teal-500/30',
                                 'Developer' => 'bg-amber-500/10 text-amber-400 border border-amber-500/30',
-                                default => 'bg-slate-500/10 text-slate-400 border border-slate-500/30'
+                                default => 'bg-slate-500/10 text-slate-400  border border-slate-500/30'
                             };
 
                             $projectCount = $u->projects->count();
                             $projectText = $projectCount === 0 ? 'Tidak ada proyek' : ($projectCount >= 5 ? 'Semua proyek' : "$projectCount proyek");
                         @endphp
-                        <tr class="hover:bg-slate-800/30 transition">
+                        <tr class="data-item hover:bg-slate-800/30 transition">
                             <td class="py-4 px-6 flex items-center space-x-3">
                                 <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 font-bold flex items-center justify-center text-xs border border-indigo-500/30 shrink-0">
                                     {{ $initials }}
@@ -175,5 +176,15 @@
         </div>
     </div>
 <x-profile-modal />
+<script>
+    function filterData() {
+        const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.data-item');
+        items.forEach(item => {
+            const match = search === '' || item.innerText.toLowerCase().includes(search);
+            item.style.display = match ? '' : 'none';
+        });
+    }
+</script>
 </body>
 </html>

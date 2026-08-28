@@ -26,6 +26,7 @@
         .fade-in { animation: fadeIn 0.35s ease both; }
         tr.bug-row:hover td { background: rgba(99,102,241,0.04); }
     </style>
+
 </head>
 <body class="h-full text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false, showLaporanModal: {{ $errors->any() || session('success') ? 'true' : 'false' }} }">
 
@@ -335,7 +336,7 @@
                                     @csrf @method('PATCH')
                                     <select name="status" onchange="this.form.submit()"
                                             class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer outline-none border-2 transition-all"
-                                            style="background:#0c0f1a;"
+                                            class="bg-[#0c0f1a]"
                                             @if(auth()->user()->role === 'Developer' && in_array($bug->status, ['Resolved','Closed','Reopened'])) disabled @endif>
                                         @if(auth()->user()->role === 'Developer')
                                             <option value="Open" {{ $bug->status === 'Open' ? 'selected' : '' }} disabled>Open</option>

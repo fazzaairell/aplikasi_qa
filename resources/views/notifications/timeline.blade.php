@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}</style>
+
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false }">
 
@@ -113,7 +114,7 @@
     </header>
     @endif
 
-    <main class="p-4 sm:p-6 lg:p-8 space-y-6">
+    <main class="p-4 sm:p-6 lg:p-8 space-y-6 {{ auth()->user()->role === 'Developer' ? 'max-w-7xl mx-auto w-full' : '' }}">
 
         <div class="mb-4">
             <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mb-1">NOTIFIKASI</div>

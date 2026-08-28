@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lupa Password - QA Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body class="h-full flex items-center justify-center font-sans text-slate-100">
 
