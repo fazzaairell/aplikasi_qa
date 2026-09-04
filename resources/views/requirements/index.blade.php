@@ -44,7 +44,7 @@
         <main class="p-8 space-y-6">   
             <div>
                 <div class="text-xs text-indigo-400 font-semibold tracking-wider mb-1">RTM</div>
-                <h1 class="text-2xl font-bold text-white tracking-tight">Requirements</h1>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Requirements</h1>
             </div>
 
             @if(session('success'))

@@ -14,10 +14,16 @@
     showAddSuiteModal: false, 
     showAddCaseModal: false, 
     showAddStep: false,
+    showDeleteSuiteModal: false,
+    showFromTemplateModal: false,
     activeSuiteId: null,
+    activeSuiteName: '',
     selectedTestCaseId: null,
     sidebarOpen: false,
-    collapsed: false
+    collapsed: false,
+    suiteMode: 'manual',
+    selectedTemplateId: '',
+    selectedTemplateProjectId: '{{ $selectedProjectId }}'
 }">
 
     <x-sidebar />
@@ -36,9 +42,6 @@
             </div>
             <div class="flex items-center space-x-4">
                 @if($selectedProjectId)
-                    <a href="{{ route('master-test-cases.index', ['project_id' => $selectedProjectId]) }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition cursor-pointer">
-                        + Master Test Case
-                    </a>
                     <button @click="showAddSuiteModal = true" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 cursor-pointer">
                         + Test Suite Baru
                     </button>
@@ -49,7 +52,7 @@
         <main class="p-8 space-y-6">
             <div>
                 <div class="text-xs text-indigo-400 font-semibold tracking-wider mb-1">PENGUJIAN</div>
-                <h1 class="text-2xl font-bold text-white tracking-tight">Test Suites & Test Cases</h1>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Test Suites & Test Cases</h1>
             </div>
 
             @if(session('success'))
@@ -129,6 +132,31 @@
                                     @endif
                                 </div>
 
+                                <!-- Tombol Simpan sebagai Template -->
+                                <form action="{{ route('test-suite-templates.save-as') }}" method="POST" class="inline" @click.stop>
+                                    @csrf
+                                    <input type="hidden" name="test_suite_id" value="{{ $suite->id }}">
+                                    <button type="submit"
+                                        onclick="return confirm('Simpan &quot;{{ addslashes($suite->name) }}&quot; sebagai Template? Semua {{ $suite->testCases->count() }} test case akan di-copy.')"
+                                        title="Simpan sebagai Template"
+                                        class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-violet-400 hover:text-violet-300 border border-violet-500/20 hover:border-violet-400/40 bg-violet-500/5 hover:bg-violet-500/10 text-[10px] font-semibold transition cursor-pointer">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                                        Template
+                                    </button>
+                                </form>
+
+                                <!-- Hapus Suite -->
+                                <form action="{{ route('test-suites.destroy', $suite->id) }}" method="POST" class="inline" @click.stop>
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        onclick="return confirm('Hapus Test Suite &quot;{{ addslashes($suite->name) }}&quot;? Semua test case di dalamnya akan terhapus.')"
+                                        title="Hapus Suite"
+                                        class="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+
                                 <!-- Arrow Toggle -->
                                 <svg class="w-5 h-5 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </div>
@@ -152,12 +180,26 @@
                                             <td class="py-3.5 px-6 font-medium text-slate-200">
                                                 <div class="font-semibold">{{ $tc->title }}</div>
                                                 @if($tc->subSteps->isNotEmpty())
-                                                    <div class="mt-2 space-y-1">
-                                                        @foreach($tc->subSteps as $step)
-                                                            <div class="text-[10px] text-slate-400 bg-slate-800/40 rounded px-2 py-1">
-                                                                <span class="font-bold text-indigo-300">{{ $step->step_number }}.</span> {{ $step->description }}
+                                                    <div class="mt-3 mb-1">
+                                                        <div class="text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2 flex items-center gap-1.5">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8M4 18h12"/></svg>
+                                                            Sub-steps
+                                                        </div>
+                                                        <div class="relative pl-3">
+                                                            {{-- Vertical connector line --}}
+                                                            <div class="absolute left-[7px] top-2 bottom-2 w-px" style="background:rgba(99,102,241,0.25);"></div>
+                                                            <div class="space-y-2">
+                                                                @foreach($tc->subSteps as $step)
+                                                                    <div class="flex items-start gap-2.5 relative">
+                                                                        {{-- Step number badge --}}
+                                                                        <div class="w-[15px] h-[15px] rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold mt-0.5 z-10"
+                                                                             style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);">{{ $step->step_number }}</div>
+                                                                        {{-- Step description --}}
+                                                                        <div class="text-[10px] text-slate-400 leading-relaxed pt-0.5">{{ $step->description }}</div>
+                                                                    </div>
+                                                                @endforeach
                                                             </div>
-                                                        @endforeach
+                                                        </div>
                                                     </div>
                                                 @endif
                                             </td>
@@ -227,24 +269,184 @@
 
     <!-- MODAL TAMBAH TEST SUITE -->
     <div x-show="showAddSuiteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" style="display: none;">
-        <div @click.away="showAddSuiteModal = false" class="w-full max-w-lg p-6 rounded-2xl bg-[#131b2e] border border-slate-800 space-y-4 shadow-2xl mx-4 md:mx-0 max-h-[85vh] overflow-y-auto">
+        <div @click.away="showAddSuiteModal = false" class="w-full max-w-lg p-6 rounded-2xl bg-[#131b2e] border border-slate-800 space-y-4 shadow-2xl mx-4 md:mx-0 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 class="text-sm font-bold text-white">Tambah Test Suite Baru</h3>
                 <button @click="showAddSuiteModal = false" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">&times;</button>
             </div>
-            
-            <form action="{{ route('test-suites.store') }}" method="POST" class="space-y-4">
-                @csrf
-                <input type="hidden" name="project_id" value="{{ $selectedProjectId }}">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Nama Test Suite</label>
-                    <input type="text" name="name" required placeholder="Contoh: Authentication Suite" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+
+            <!-- TAB SWITCHER -->
+            <div class="flex rounded-xl overflow-hidden border border-slate-800 text-xs font-semibold">
+                <button type="button"
+                    @click="suiteMode = 'manual'"
+                    :class="suiteMode === 'manual' ? 'bg-indigo-600 text-white' : 'bg-[#0b0f19] text-slate-400 hover:text-white'"
+                    class="flex-1 py-2.5 transition cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Buat Manual
+                </button>
+                <button type="button"
+                    @click="suiteMode = 'template'"
+                    :class="suiteMode === 'template' ? 'bg-violet-600 text-white' : 'bg-[#0b0f19] text-slate-400 hover:text-white'"
+                    class="flex-1 py-2.5 transition cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                    Mulai dari Template
+                </button>
+            </div>
+
+            <!-- MODE: MANUAL -->
+            <div x-show="suiteMode === 'manual'" x-transition>
+                <form action="{{ route('test-suites.store') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="project_id" value="{{ $selectedProjectId }}">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">Nama Test Suite</label>
+                        <input type="text" name="name" required placeholder="Contoh: Authentication Suite" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
+                    </div>
+                    <div class="flex items-center justify-end space-x-3 pt-2">
+                        <button type="button" @click="showAddSuiteModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition cursor-pointer">Simpan Suite</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- MODE: DARI TEMPLATE -->
+            <div x-show="suiteMode === 'template'" x-transition>
+                @php
+                    $allTemplates = \App\Models\TestSuiteTemplate::with('testCaseTemplates')
+                        ->orderByDesc('created_at')->get();
+                    $templatesJson = $allTemplates->map(fn($t) => [
+                        'id'   => $t->id,
+                        'name' => $t->name,
+                        'tcs'  => $t->testCaseTemplates->map(fn($tc) => [
+                            'id'       => $tc->id,
+                            'title'    => $tc->title,
+                            'priority' => $tc->priority,
+                        ])->values(),
+                    ])->values()->toJson();
+                @endphp
+
+                @if($allTemplates->isEmpty())
+                    <div class="text-center py-8 text-slate-500 text-xs">
+                        <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                        Belum ada template tersimpan.<br>Simpan sebuah Test Suite sebagai template terlebih dahulu.
+                    </div>
+                @else
+                <div x-data="{
+                        allTmpl: {{ $templatesJson }},
+                        tmplId: '',
+                        projectId: '{{ $selectedProjectId ?? '' }}',
+                        templateTcs: [],
+                        requirements: [],
+                        reqMap: {},
+                        loading: false,
+                        onTemplateChange() {
+                            const t = this.allTmpl.find(x => x.id == this.tmplId);
+                            this.templateTcs = t ? t.tcs : [];
+                            this.reqMap = {};
+                        },
+                        async onProjectChange() {
+                            this.requirements = [];
+                            if (!this.projectId) return;
+                            this.loading = true;
+                            try {
+                                const r = await fetch(`/projects/${this.projectId}/requirements-json`);
+                                this.requirements = await r.json();
+                            } catch(e) { this.requirements = []; }
+                            this.loading = false;
+                        }
+                    }"
+                    x-init="if (projectId) onProjectChange()">
+
+                    <form action="{{ route('test-suite-templates.use') }}" method="POST" class="space-y-4">
+                        @csrf
+
+                        <!-- Pilih Template -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">Pilih Template</label>
+                            <select name="template_id" x-model="tmplId" @change="onTemplateChange()" required
+                                class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-violet-500 text-xs">
+                                <option value="">-- Pilih Template --</option>
+                                @foreach($allTemplates as $tmpl)
+                                    <option value="{{ $tmpl->id }}">{{ $tmpl->name }} ({{ $tmpl->testCaseTemplates->count() }} test cases)</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Pilih Project -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">Project Tujuan</label>
+                            <select name="project_id" x-model="projectId" @change="onProjectChange()" required
+                                class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-violet-500 text-xs">
+                                <option value="">-- Pilih Project --</option>
+                                @foreach($projects as $proj)
+                                    <option value="{{ $proj->id }}" {{ $selectedProjectId == $proj->id ? 'selected' : '' }}>{{ $proj->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Nama Suite -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">Nama Suite <span class="text-slate-600 font-normal">(opsional)</span></label>
+                            <input type="text" name="suite_name" placeholder="Kosongkan untuk pakai nama template"
+                                class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-violet-500 text-xs">
+                        </div>
+
+                        <!-- Mapping Requirement per Test Case -->
+                        <div x-show="templateTcs.length > 0" x-transition>
+                            <div class="flex items-center gap-2 mb-2">
+                                <label class="text-[11px] font-bold text-slate-400">Mapping Requirement</label>
+                                <span class="text-[10px] text-slate-600">(opsional, per test case)</span>
+                                <div x-show="loading" class="ml-auto">
+                                    <svg class="w-3.5 h-3.5 text-violet-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                </div>
+                            </div>
+                            <div class="rounded-xl border border-slate-800/60 overflow-hidden divide-y divide-slate-800/60">
+                                <template x-for="tc in templateTcs" :key="tc.id">
+                                    <div class="px-3 py-2.5 bg-[#0b0f19]/50 flex items-center gap-3">
+                                        <!-- Priority badge -->
+                                        <span class="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
+                                            :class="{
+                                                'bg-rose-500/15 text-rose-400': tc.priority === 'Critical',
+                                                'bg-amber-500/15 text-amber-400': tc.priority === 'High',
+                                                'bg-indigo-500/15 text-indigo-400': tc.priority === 'Medium',
+                                                'bg-slate-700/30 text-slate-400': tc.priority === 'Low'
+                                            }"
+                                            x-text="tc.priority">
+                                        </span>
+                                        <!-- TC Title -->
+                                        <span class="text-[11px] text-slate-300 font-medium flex-1 truncate" x-text="tc.title"></span>
+                                        <!-- Requirement dropdown -->
+                                        <select
+                                            :name="`requirement_ids[${tc.id}]`"
+                                            x-model="reqMap[tc.id]"
+                                            class="w-36 px-2 py-1.5 bg-[#131b2e] border border-slate-700 rounded-lg text-slate-300 text-[10px] focus:outline-none focus:border-violet-500 shrink-0">
+                                            <option value="">— Tanpa Req —</option>
+                                            <template x-for="req in requirements" :key="req.id">
+                                                <option :value="req.id" x-text="req.code + ' — ' + (req.description ? req.description.substring(0,30) : '')"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </template>
+                            </div>
+                            <p x-show="requirements.length === 0 && projectId && !loading" class="text-[10px] text-slate-600 mt-1.5">
+                                Project ini belum memiliki requirement terdaftar.
+                            </p>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-violet-500/5 border border-violet-500/20 text-[10px] text-violet-300 flex items-start gap-2">
+                            <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Test case di-<strong>copy</strong> secara independen — perubahan pada suite baru tidak mempengaruhi template asli.</span>
+                        </div>
+
+                        <div class="flex items-center justify-end space-x-3 pt-1">
+                            <button type="button" @click="showAddSuiteModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition cursor-pointer">Generate dari Template</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="flex items-center justify-end space-x-3 pt-2">
-                    <button type="button" @click="showAddSuiteModal = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition cursor-pointer">Simpan Suite</button>
-                </div>
-            </form>
+                @endif
+            </div>
+
         </div>
     </div>
 
@@ -262,15 +464,6 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Judul Test Case</label>
                     <input type="text" name="title" required placeholder="Contoh: Login dengan kredensial valid" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Pilih Master Test Case (Opsional)</label>
-                    <select name="master_test_case_id" class="w-full px-4 py-2.5 bg-[#0b0f19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs">
-                        <option value="">Pilih master test case yang bisa dipakai ulang</option>
-                        @foreach(App\Models\MasterTestCase::where('project_id', $selectedProjectId)->get() as $masterCase)
-                            <option value="{{ $masterCase->id }}">{{ $masterCase->title }}</option>
-                        @endforeach
-                    </select>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 mb-1">Requirement Terkait</label>

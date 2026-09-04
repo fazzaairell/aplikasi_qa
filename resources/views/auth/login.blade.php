@@ -279,6 +279,13 @@
             color: #f87171;
             margin-bottom: 20px;
         }
+        .brand-text {
+            font-size: 21px;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: -0.3px;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+        }
 
         /* Welcome text animation - subtle fade in words */
         .word { display: inline-block; opacity: 0; animation: fadeWord 0.5s ease forwards; }
@@ -308,7 +315,10 @@
             <div class="logo-mark" style="margin-bottom: 0;">
                 <img src="{{ asset('image/icon-aldo.png') }}" alt="Logo">
             </div>
-            <span style="color: #f8fafc; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">Alkindo</span>
+            <div style="width: 1px; height: 22px; background: rgba(255,255,255,0.08);"></div>
+            <div>
+                <span class="brand-text">Testify</span>
+            </div>
         </div>
 
         <!-- Heading -->
@@ -363,10 +373,10 @@
                 <span>Ingat saya selama 30 hari</span>
             </div>
 
-            <button type="submit" class="btn-submit">Masuk ke Platform</button>
+            <button type="submit" class="btn-submit">Masuk</button>
         </form>
 
-        <p class="footer-text">Belum punya akun? <a href="#">Hubungi Admin</a></p>
+        <p class="footer-text">Belum punya akun? <a href="#">Hubungi PA MAKS</a></p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>

@@ -21,8 +21,4 @@ class TestSuite extends Model
         return $this->hasMany(TestCase::class);
     }
 
-    public function masterTestCases()
-    {
-        return $this->belongsToMany(MasterTestCase::class, 'master_test_case_test_suite');
-    }
 }

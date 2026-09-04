@@ -11,14 +11,13 @@ class RequirementController extends Controller
     public function index(Request $request)
     {
         $projects = Project::withCount('requirements')->get();
-        // Ambil project aktif dari parameter URL, jika tidak ada biarkan null
         $selectedProjectId = $request->get('project_id');
-        
+
         $requirements = collect();
         if ($selectedProjectId) {
             $requirements = Requirement::with('testCases')
                 ->where('project_id', $selectedProjectId)
-                ->latest()
+                ->orderBy('code', 'asc')
                 ->get();
         }
 

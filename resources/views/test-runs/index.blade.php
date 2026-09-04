@@ -153,7 +153,7 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <div class="text-xs text-indigo-400 font-semibold tracking-wider mb-1">EKSEKUSI</div>
-                    <h1 class="text-2xl font-bold text-white tracking-tight">Test Runs</h1>
+                    <h1 class="text-3xl font-bold text-white tracking-tight">Test Runs</h1>
                 </div>
 
                 <!-- FILTER PROYEK -->

@@ -17,7 +17,7 @@
         <div class="max-w-7xl mx-auto px-8 h-full flex items-center justify-between relative">
         <div class="flex items-center space-x-3 w-1/3">
             <img src="{{ asset('image/icon-aldo.png') }}" alt="Logo" class="w-9 h-9 rounded-xl object-cover">
-            <span class="font-bold text-lg text-white tracking-wide">QA Platform</span>
+            <span class="font-bold text-lg text-white tracking-wide">TESTIFY</span>
         </div>
 
             <!-- DEVELOPER LINKS CENTERED -->

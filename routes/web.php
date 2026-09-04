@@ -9,6 +9,7 @@ use App\Http\Controllers\BugController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\TestSuiteController;
+use App\Http\Controllers\TestSuiteTemplateController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -101,6 +102,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+    Route::get('/projects/{id}/requirements-json', [ProjectController::class, 'requirementsJson'])->name('projects.requirements-json');
 
     // 2. Manajemen Requirements (RTM)
     Route::resource('requirements', RequirementController::class);
@@ -109,12 +111,16 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('/test-suites', [TestSuiteController::class, 'index'])->name('test-suites.index');
     Route::post('/test-suites', [TestSuiteController::class, 'storeSuite'])->name('test-suites.store');
     Route::delete('/test-suites/{id}', [TestSuiteController::class, 'destroySuite'])->name('test-suites.destroy');
-    Route::get('/master-test-cases', [TestSuiteController::class, 'masterIndex'])->name('master-test-cases.index');
-    Route::post('/master-test-cases', [TestSuiteController::class, 'storeMasterCase'])->name('master-test-cases.store');
-    Route::post('/master-test-cases/attach', [TestSuiteController::class, 'attachMasterCase'])->name('master-test-cases.attach');
     Route::post('/test-cases', [TestSuiteController::class, 'storeCase'])->name('test-cases.store');
     Route::post('/test-case-steps', [TestSuiteController::class, 'storeSubStep'])->name('test-case-steps.store');
     Route::delete('/test-cases/{id}', [TestSuiteController::class, 'destroyCase'])->name('test-cases.destroy');
+
+    // 3b. Template Test Suite
+    Route::get('/test-suite-templates', [TestSuiteTemplateController::class, 'index'])->name('test-suite-templates.index');
+    Route::post('/test-suite-templates/save-as', [TestSuiteTemplateController::class, 'saveAsTemplate'])->name('test-suite-templates.save-as');
+    Route::post('/test-suite-templates/use', [TestSuiteTemplateController::class, 'useTemplate'])->name('test-suite-templates.use');
+    Route::patch('/test-suite-templates/{id}/rename', [TestSuiteTemplateController::class, 'rename'])->name('test-suite-templates.rename');
+    Route::delete('/test-suite-templates/{id}', [TestSuiteTemplateController::class, 'destroy'])->name('test-suite-templates.destroy');
 
     // 4. Test Runs & Eksekusi Hasil Tes
     Route::get('/test-runs', [TestRunController::class, 'index'])->name('test-runs.index');

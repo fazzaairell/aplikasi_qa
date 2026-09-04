@@ -11,7 +11,7 @@ class TestCase extends Model
 
     protected $fillable = [
         'test_suite_id', 
-        'requirement_id', 
+        'requirement_id',  // nullable — boleh null (misal: di-generate dari template)
         'title', 
         'steps', 
         'expected_result', 
