@@ -27,3 +27,13 @@ Homestead.yaml
 Thumbs.db
 
 .envnkjbjbb
+
+# File debug/testing manual — jangan pernah taruh script beginian di root,
+# apalagi yang bisa nge-dump data user / bypass auth Laravel.
+/check_users.php
+/test_view.php
+/compile.php
+/test_output.html
+/test_qa_2026
+/test_compiled.php
+/debug-scripts/

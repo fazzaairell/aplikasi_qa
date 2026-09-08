@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>Comprehensive Reports - QA Management</title>
+<title>Comprehensive Reports - TESTIFY</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -94,48 +94,6 @@
         style="background: rgba(12,15,26,0.85); backdrop-filter: blur(12px);"
     >
 
-        <div class="flex items-center gap-3">
-
-            <button
-                @click="$dispatch('toggle-sidebar')"
-                class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white border border-white/[0.06] cursor-pointer"
-                style="background:#111827;"
-            >
-                <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                </svg>
-            </button>
-
-            <div class="text-xs text-slate-500 font-medium">
-                Laporan &rsaquo;
-                <span class="text-slate-300">
-                    Comprehensive
-                </span>
-            </div>
-
-        </div>
-
-        <div class="flex items-center gap-3">
-
-            <span
-                class="px-2.5 py-1 rounded-lg text-[10px] font-bold"
-                style="background:rgba(99,102,241,0.1); color:#818cf8; border:1px solid rgba(99,102,241,0.2);"
-            >
-                LIVE
-            </span>
-
-        </div>
-
     </header>
 
 
@@ -143,16 +101,6 @@
 
         <!-- PAGE HEADER -->
         <div class="mb-2">
-
-            <div class="flex items-center space-x-2 mb-1">
-
-                <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-
-                <span class="text-[11px] text-indigo-400 font-bold tracking-widest uppercase">
-                    Comprehensive
-                </span>
-
-            </div>
 
             <h1 class="text-3xl font-bold text-white tracking-tight">
                 Comprehensive Reports
@@ -210,7 +158,7 @@
                     @if(request('project_id'))
 
                         <a
-                            href="{{ route('report.comprehensive') }}"
+                            href="{{ route('reports.comprehensive') }}"
                             class="px-4 py-2.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold border border-indigo-500/20 rounded-xl transition"
                             style="background:rgba(99,102,241,0.05);"
                         >
@@ -229,753 +177,223 @@
         <!-- KEY METRICS -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-            <!-- Pass Rate -->
-            <div
-                class="metric-card rounded-2xl p-5 space-y-3"
-                style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25);"
-            >
-
-                <div class="flex items-center justify-between">
-
-                    <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                        Pass Rate
-                    </span>
-
-                    <div
-                        class="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style="background:rgba(16,185,129,0.15);"
-                    >
-
-                        <svg
-                            class="w-4 h-4 text-emerald-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-                <div class="text-4xl font-extrabold text-white">
-                    {{ $passRate }}
-                    <span class="text-lg text-emerald-400">%</span>
-                </div>
-
-                <div class="text-[11px] text-slate-400">
-                    {{ $resultsByStatus['Passed'] ?? 0 }} / {{ $totalResults }} passed
-                </div>
-
+            <!-- Total Requirements -->
+            <div class="metric-card bg-[#111827] border border-slate-800/80 rounded-2xl p-5">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Total Requirement</p>
+                <p class="text-2xl font-bold text-white">{{ $totalRequirements }}</p>
             </div>
 
-
-            <!-- Total Bugs -->
-            <div
-                class="metric-card rounded-2xl p-5 space-y-3"
-                style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25);"
-            >
-
-                <div class="flex items-center justify-between">
-
-                    <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">
-                        Total Bugs
-                    </span>
-
-                    <div
-                        class="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style="background:rgba(239,68,68,0.15);"
-                    >
-
-                        <svg
-                            class="w-4 h-4 text-rose-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                        </svg>
-
-                    </div>
-
+            <!-- Coverage -->
+            <div class="metric-card bg-[#111827] border border-slate-800/80 rounded-2xl p-5">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Requirement Tercover</p>
+                <p class="text-2xl font-bold text-white">{{ $requirementsWithTestCase }} <span class="text-sm text-slate-500 font-semibold">/ {{ $totalRequirements }}</span></p>
+                <div class="mt-2 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="bar-fill h-full bg-indigo-500" style="width: 0%;" x-data="{ coverage: {{ $coveragePercent }} }" x-init="$el.style.width = coverage + '%'"></div>
                 </div>
-
-                <div class="text-4xl font-extrabold text-white">
-                    {{ $totalBugs }}
-                </div>
-
-                <div class="text-[11px] text-slate-400">
-                    {{ $bugsByStatus['Open'] ?? 0 }} open,
-                    {{ $bugsByStatus['In Progress'] ?? 0 }} in progress
-                </div>
-
+                <p class="text-[10px] text-indigo-400 font-bold mt-1">{{ $coveragePercent }}%</p>
             </div>
 
-
-            <!-- Test Runs -->
-            <div
-                class="metric-card rounded-2xl p-5 space-y-3"
-                style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25);"
-            >
-
-                <div class="flex items-center justify-between">
-
-                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                        Test Runs
-                    </span>
-
-                    <div
-                        class="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style="background:rgba(99,102,241,0.15);"
-                    >
-
-                        <svg
-                            class="w-4 h-4 text-indigo-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                            />
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-                <div class="text-4xl font-extrabold text-white">
-                    {{ $totalRuns }}
-                </div>
-
-                <div class="text-[11px] text-slate-400">
-                    {{ $activeRuns }} active,
-                    {{ $completedRuns }} completed
-                </div>
-
+            <!-- Total Test Cases -->
+            <div class="metric-card bg-[#111827] border border-slate-800/80 rounded-2xl p-5">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Total Test Case</p>
+                <p class="text-2xl font-bold text-white">{{ $totalTestCases }}</p>
             </div>
 
-
-            <!-- Avg Bugs / Run -->
-            <div
-                class="metric-card rounded-2xl p-5 space-y-3"
-                style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);"
-            >
-
-                <div class="flex items-center justify-between">
-
-                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-                        Avg Bugs/Run
-                    </span>
-
-                    <div
-                        class="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style="background:rgba(245,158,11,0.15);"
-                    >
-
-                        <svg
-                            class="w-4 h-4 text-amber-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-                <div class="text-4xl font-extrabold text-white">
-                    {{ $avgBugsPerRun }}
-                </div>
-
-                <div class="text-[11px] text-slate-400">
-                    Quality metric
-                </div>
-
+            <!-- Orphan Test Cases -->
+            <div class="metric-card bg-[#111827] border border-slate-800/80 rounded-2xl p-5">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Test Case Tanpa Requirement</p>
+                <p class="text-2xl font-bold {{ $orphanTestCases->count() > 0 ? 'text-amber-400' : 'text-white' }}">{{ $orphanTestCases->count() }}</p>
             </div>
 
         </div>
 
 
-        <!-- DISTRIBUTION CHARTS -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            <!-- Bug Status Distribution -->
-            <div class="bg-[#111827] border border-slate-800/80 rounded-2xl p-6">
-
-                <div class="flex items-center gap-2 mb-5">
-
-                    <div
-                        class="w-7 h-7 rounded-lg flex items-center justify-center"
-                        style="background:rgba(239,68,68,0.15);"
-                    >
-
-                        <svg
-                            class="w-3.5 h-3.5 text-rose-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                        </svg>
-
-                    </div>
-
-                    <h2 class="text-sm font-bold text-white">
-                        Bug Status Distribution
-                    </h2>
-
-                </div>
-
-
-                <div class="space-y-3.5">
-
-                    @foreach($bugsByStatus as $status => $count)
-
-                        @php
-                            $percentage = $totalBugs > 0
-                                ? round($count / $totalBugs * 100)
-                                : 0;
-
-                            $colorMap = [
-                                'Open' => [
-                                    'bg' => 'rgba(239,68,68,0.7)',
-                                    'text' => '#fca5a5'
-                                ],
-
-                                'In Progress' => [
-                                    'bg' => 'rgba(245,158,11,0.7)',
-                                    'text' => '#fde68a'
-                                ],
-
-                                'Done in Review' => [
-                                    'bg' => 'rgba(139,92,246,0.7)',
-                                    'text' => '#c4b5fd'
-                                ],
-
-                                'Closed' => [
-                                    'bg' => 'rgba(16,185,129,0.7)',
-                                    'text' => '#6ee7b7'
-                                ],
-
-                                'Reopened' => [
-                                    'bg' => 'rgba(236,72,153,0.7)',
-                                    'text' => '#f9a8d4'
-                                ],
-                            ];
-
-                            $clr = $colorMap[$status] ?? [
-                                'bg' => 'rgba(99,102,241,0.7)',
-                                'text' => '#a5b4fc'
-                            ];
-                        @endphp
-
-
-                        <div>
-
-                            <div class="flex items-center justify-between mb-1.5">
-
-                                <span
-                                    class="text-xs font-medium"
-                                    x-bind:style="'color: ' + @js($clr['text'])"
-                                >
-                                    {{ $status }}
-                                </span>
-
-                                <div class="flex items-center gap-2">
-
-                                    <span class="text-[11px] text-slate-500">
-                                        {{ $percentage }}%
-                                    </span>
-
-                                    <span class="text-xs font-bold text-white">
-                                        {{ $count }}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                class="w-full rounded-full h-1.5"
-                                style="background:rgba(255,255,255,0.06);"
-                            >
-
-                                <div
-                                    class="h-1.5 rounded-full bar-fill"
-                                    x-bind:style="'width: ' + {{ $percentage }} + '%; background: ' + @js($clr['bg'])"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                    @endforeach
-
-
-                    @if($totalBugs === 0)
-
-                        <p class="text-xs text-slate-500 text-center py-4">
-                            Belum ada data bug
-                        </p>
-
-                    @endif
-
-                </div>
-
-            </div>
-
-
-            <!-- Test Result Status -->
-            <div class="bg-[#111827] border border-slate-800/80 rounded-2xl p-6">
-
-                <div class="flex items-center gap-2 mb-5">
-
-                    <div
-                        class="w-7 h-7 rounded-lg flex items-center justify-center"
-                        style="background:rgba(16,185,129,0.15);"
-                    >
-
-                        <svg
-                            class="w-3.5 h-3.5 text-emerald-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-
-                    </div>
-
-                    <h2 class="text-sm font-bold text-white">
-                        Test Result Status
-                    </h2>
-
-                </div>
-
-
-                <div class="space-y-3.5">
-
-                    @foreach($resultsByStatus as $status => $count)
-
-                        @php
-                            $percentage = $totalResults > 0
-                                ? round($count / $totalResults * 100)
-                                : 0;
-
-                            $resultColorMap = [
-                                'Passed' => [
-                                    'bg' => 'rgba(16,185,129,0.7)',
-                                    'text' => '#6ee7b7'
-                                ],
-
-                                'Failed' => [
-                                    'bg' => 'rgba(239,68,68,0.7)',
-                                    'text' => '#fca5a5'
-                                ],
-
-                                'Blocked' => [
-                                    'bg' => 'rgba(245,158,11,0.7)',
-                                    'text' => '#fde68a'
-                                ],
-
-                                'Untested' => [
-                                    'bg' => 'rgba(99,102,241,0.7)',
-                                    'text' => '#a5b4fc'
-                                ],
-                            ];
-
-                            $rclr = $resultColorMap[$status] ?? [
-                                'bg' => 'rgba(107,114,128,0.7)',
-                                'text' => '#9ca3af'
-                            ];
-                        @endphp
-
-
-                        <div>
-
-                            <div class="flex items-center justify-between mb-1.5">
-
-                                <span
-                                    class="text-xs font-medium"
-                                    x-bind:style="'color: ' + @js($rclr['text'])"
-                                >
-                                    {{ $status }}
-                                </span>
-
-                                <div class="flex items-center gap-2">
-
-                                    <span class="text-[11px] text-slate-500">
-                                        {{ $percentage }}%
-                                    </span>
-
-                                    <span class="text-xs font-bold text-white">
-                                        {{ $count }}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                class="w-full rounded-full h-1.5"
-                                style="background:rgba(255,255,255,0.06);"
-                            >
-
-                                <div
-                                    class="h-1.5 rounded-full bar-fill"
-                                    x-bind:style="'width: ' + {{ $percentage }} + '%; background: ' + @js($rclr['bg'])"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                    @endforeach
-
-
-                    @if($totalResults === 0)
-
-                        <p class="text-xs text-slate-500 text-center py-4">
-                            Belum ada data hasil test
-                        </p>
-
-                    @endif
-
-                </div>
-
-            </div>
-
+        <!-- REQUIREMENT TRACEABILITY MATRIX -->
+        <div class="mb-2 mt-8">
+            <h2 class="text-lg font-bold text-white tracking-tight">Requirement Traceability Matrix</h2>
+            <p class="text-xs text-slate-400 mt-1">Setiap requirement, test case yang mengujinya, dan riwayat status dari tiap test run.</p>
         </div>
 
+        <div class="space-y-4">
 
-        <!-- RECENT ITEMS -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            @php
+                $currentProjectName = null;
+            @endphp
 
-            <!-- Recent Bugs -->
-            <div class="bg-[#111827] border border-slate-800/80 rounded-2xl overflow-hidden">
+            @forelse($requirements as $requirement)
 
-                <div class="flex items-center justify-between p-5 border-b border-slate-800/80">
-
-                    <div class="flex items-center gap-2">
-
-                        <div
-                            class="w-7 h-7 rounded-lg flex items-center justify-center"
-                            style="background:rgba(239,68,68,0.15);"
-                        >
-
-                            <svg
-                                class="w-3.5 h-3.5 text-rose-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                                />
-                            </svg>
-
-                        </div>
-
-                        <h2 class="text-sm font-bold text-white">
-                            Recent Bugs
-                        </h2>
-
+                @if(!$selectedProject && $requirement->project?->name !== $currentProjectName)
+                    @php $currentProjectName = $requirement->project?->name; @endphp
+                    <div class="flex items-center gap-2 pt-2 pb-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                        <span class="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">{{ $currentProjectName ?? 'Tanpa Proyek' }}</span>
                     </div>
+                @endif
 
-                    <a
-                        href="{{ route('report.bug-history') }}"
-                        class="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition"
-                    >
-                        Lihat Semua →
-                    </a>
+                <div class="data-item bg-[#131b2e] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl" x-data="{ open: false }">
 
-                </div>
+                    <!-- REQUIREMENT HEADER -->
+                    <div @click="open = !open" class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 transition">
 
-
-                <div class="divide-y divide-slate-800/60">
-
-                    @forelse($recentBugs as $bug)
-
-                        @php
-                            $bugBadge = match($bug->status) {
-
-                                'Open' => [
-                                    'bg' => 'rgba(239,68,68,0.12)',
-                                    'border' => 'rgba(239,68,68,0.3)',
-                                    'text' => '#fca5a5'
-                                ],
-
-                                'In Progress' => [
-                                    'bg' => 'rgba(245,158,11,0.12)',
-                                    'border' => 'rgba(245,158,11,0.3)',
-                                    'text' => '#fde68a'
-                                ],
-
-                                'Closed' => [
-                                    'bg' => 'rgba(16,185,129,0.12)',
-                                    'border' => 'rgba(16,185,129,0.3)',
-                                    'text' => '#6ee7b7'
-                                ],
-
-                                default => [
-                                    'bg' => 'rgba(99,102,241,0.12)',
-                                    'border' => 'rgba(99,102,241,0.3)',
-                                    'text' => '#a5b4fc'
-                                ],
-                            };
-                        @endphp
-
-
-                        <a
-                            href="{{ route('report.bug-detail', $bug->id) }}"
-                            class="flex items-center justify-between p-4 hover:bg-white/[0.02] transition group"
-                        >
-
+                        <div class="flex items-center space-x-4 min-w-10">
+                            <div class="w-16 h-9 shrink-0 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[11px] border border-indigo-500/30">
+                                {{ $requirement->code }}
+                            </div>
                             <div class="min-w-0">
-
-                                <div class="text-sm font-semibold text-white truncate group-hover:text-indigo-300 transition">
-                                    {{ $bug->title }}
-                                </div>
-
-                                <div class="text-[11px] text-slate-500 mt-0.5">
-                                    #{{ $bug->id }}
-                                    &bull;
-                                    {{ $bug->created_at->format('d M Y') }}
-                                </div>
-
+                                <h3 class="text-sm font-bold text-white truncate">{{ $requirement->title ?: $requirement->description }}</h3>
+                                <span class="text-[11px] text-slate-400">{{ $requirement->testCases->count() }} test case</span>
                             </div>
-
-
-                            <span
-                                class="ml-3 px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap shrink-0"
-                                x-bind:style="'background: ' + @js($bugBadge['bg']) + '; color: ' + @js($bugBadge['text']) + '; border: 1px solid ' + @js($bugBadge['border'])"
-                            >
-                                {{ $bug->status }}
-                            </span>
-
-                        </a>
-
-                    @empty
-
-                        <div class="p-10 text-center">
-
-                            <div
-                                class="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                                style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);"
-                            >
-
-                                <svg
-                                    class="w-5 h-5 text-indigo-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-
-                            </div>
-
-                            <p class="text-xs text-slate-500 font-medium">
-                                Belum ada bugs
-                            </p>
-
                         </div>
 
-                    @endforelse
+                        <div class="flex items-center space-x-3 shrink-0">
+                            @if($requirement->testCases->isEmpty())
+                                <span class="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold whitespace-nowrap">Belum Ada Test Case</span>
+                            @else
+                                @php
+                                    $latestPerCase = $requirement->testCases->map(fn ($tc) => optional($tc->testResults->first())->status ?? 'Untested');
+                                    $passedCount = $latestPerCase->filter(fn ($s) => $s === 'Passed')->count();
+                                    $failedCount = $latestPerCase->filter(fn ($s) => $s === 'Failed')->count();
+                                    $blockedCount = $latestPerCase->filter(fn ($s) => $s === 'Blocked')->count();
+                                    $untestedCount = $latestPerCase->filter(fn ($s) => $s === 'Untested')->count();
+                                @endphp
+                                @if($passedCount > 0)
+                                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">{{ $passedCount }} Passed</span>
+                                @endif
+                                @if($failedCount > 0)
+                                    <span class="px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold">{{ $failedCount }} Failed</span>
+                                @endif
+                                @if($blockedCount > 0)
+                                    <span class="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold">{{ $blockedCount }} Blocked</span>
+                                @endif
+                                @if($untestedCount > 0)
+                                    <span class="px-2.5 py-1 rounded-full bg-slate-700/30 border border-slate-700 text-slate-400 text-[10px] font-bold">{{ $untestedCount }} Untested</span>
+                                @endif
+                            @endif
 
-                </div>
-
-            </div>
-
-
-            <!-- Recent Test Runs -->
-            <div class="bg-[#111827] border border-slate-800/80 rounded-2xl overflow-hidden">
-
-                <div class="flex items-center justify-between p-5 border-b border-slate-800/80">
-
-                    <div class="flex items-center gap-2">
-
-                        <div
-                            class="w-7 h-7 rounded-lg flex items-center justify-center"
-                            style="background:rgba(99,102,241,0.15);"
-                        >
-
-                            <svg
-                                class="w-3.5 h-3.5 text-indigo-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
+                            <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-slate-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
-
                         </div>
-
-                        <h2 class="text-sm font-bold text-white">
-                            Recent Test Runs
-                        </h2>
 
                     </div>
 
-                    <a
-                        href="{{ route('test-runs.index') }}"
-                        class="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition"
-                    >
-                        Lihat Semua →
-                    </a>
+                    <!-- TEST CASES DI BAWAH REQUIREMENT INI -->
+                    <div x-show="open" class="border-t border-slate-800/80 divide-y divide-slate-800/60">
+
+                        @forelse($requirement->testCases as $testCase)
+                            <div class="p-5 pl-8">
+
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="text-slate-600">&#8618;</span>
+                                        <h4 class="text-xs font-bold text-slate-200 truncate">{{ $testCase->title }}</h4>
+                                        @php
+                                            $pColor = match($testCase->priority) {
+                                                'High' => 'text-red-400',
+                                                'Medium' => 'text-amber-400',
+                                                default => 'text-slate-400',
+                                            };
+                                        @endphp
+                                        <span class="text-[10px] font-semibold {{ $pColor }}">&uarr; {{ $testCase->priority }}</span>
+                                    </div>
+                                </div>
+
+                                @forelse($testCase->testResults as $result)
+                                    @php
+                                        $sBadge = match($result->status) {
+                                            'Passed' => 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+                                            'Failed' => 'bg-red-500/10 border-red-500/20 text-red-400',
+                                            'Blocked' => 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+                                            default => 'bg-slate-700/20 border-slate-700 text-slate-400',
+                                        };
+                                    @endphp
+                                    <div class="flex items-center justify-between py-1.5 pl-5 text-[11px]">
+                                        <span class="text-slate-500">
+                                            {{ optional($result->testRun)->title ?? 'Test Run tidak diketahui' }}
+                                            <span class="text-slate-700">&middot;</span>
+                                            {{ $result->updated_at->translatedFormat('d M Y, H:i') }}
+                                        </span>
+                                        <span class="px-2.5 py-0.5 rounded-full border text-[10px] font-bold {{ $sBadge }}">{{ $result->status }}</span>
+                                    </div>
+                                @empty
+                                    <div class="flex items-center justify-between py-1.5 pl-5 text-[11px]">
+                                        <span class="text-slate-600">Belum pernah dijalankan di test run manapun</span>
+                                        <span class="px-2.5 py-0.5 rounded-full border bg-slate-700/20 border-slate-700 text-slate-400 text-[10px] font-bold">Untested</span>
+                                    </div>
+                                @endforelse
+
+                            </div>
+                        @empty
+                            <div class="p-5 pl-8 text-[11px] text-slate-500">
+                                Belum ada test case untuk requirement ini.
+                            </div>
+                        @endforelse
+
+                    </div>
 
                 </div>
 
-
-                <div class="divide-y divide-slate-800/60">
-
-                    @forelse($recentRuns as $run)
-
-                        @php
-                            $runBadge = $run->status === 'Active'
-
-                                ? [
-                                    'bg' => 'rgba(99,102,241,0.12)',
-                                    'border' => 'rgba(99,102,241,0.3)',
-                                    'text' => '#a5b4fc'
-                                ]
-
-                                : [
-                                    'bg' => 'rgba(16,185,129,0.12)',
-                                    'border' => 'rgba(16,185,129,0.3)',
-                                    'text' => '#6ee7b7'
-                                ];
-                        @endphp
-
-
-                        <a
-                            href="{{ route('test-runs.index') }}"
-                            class="flex items-center justify-between p-4 hover:bg-white/[0.02] transition group"
-                        >
-
-                            <div class="min-w-0">
-
-                                <div class="text-sm font-semibold text-white truncate group-hover:text-indigo-300 transition">
-                                    {{ $run->title }}
-                                </div>
-
-                                <div class="text-[11px] text-slate-500 mt-0.5">
-                                    {{ $run->project?->name ?? '-' }}
-                                    &bull;
-                                    {{ $run->created_at->format('d M Y') }}
-                                </div>
-
-                            </div>
-
-
-                            <span
-                                class="ml-3 px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap shrink-0"
-                                x-bind:style="'background: ' + @js($runBadge['bg']) + '; color: ' + @js($runBadge['text']) + '; border: 1px solid ' + @js($runBadge['border'])"
-                            >
-                                {{ $run->status }}
-                            </span>
-
-                        </a>
-
-                    @empty
-
-                        <div class="p-10 text-center">
-
-                            <div
-                                class="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                                style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);"
-                            >
-
-                                <svg
-                                    class="w-5 h-5 text-indigo-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-
-                            </div>
-
-                            <p class="text-xs text-slate-500 font-medium">
-                                Belum ada test runs
-                            </p>
-
-                        </div>
-
-                    @endforelse
-
+            @empty
+                <div class="p-8 text-center bg-[#131b2e] border border-slate-800 rounded-2xl text-slate-400 text-sm">
+                    Belum ada requirement yang tersedia.
                 </div>
-
-            </div>
+            @endforelse
 
         </div>
+
+
+        <!-- TEST CASE TANPA REQUIREMENT -->
+        @if($orphanTestCases->isNotEmpty())
+            <div class="mb-2 mt-8">
+                <h2 class="text-lg font-bold text-white tracking-tight">Test Case Tanpa Requirement</h2>
+                <p class="text-xs text-slate-400 mt-1">Test case ini belum dikaitkan ke requirement mana pun (misal hasil generate dari template).</p>
+            </div>
+
+            <div class="space-y-4">
+                @foreach($orphanTestCases as $testCase)
+                    <div class="data-item bg-[#131b2e] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl" x-data="{ open: false }">
+
+                        <div @click="open = !open" class="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 transition">
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-bold text-white truncate">{{ $testCase->title }}</h3>
+                                <span class="text-[11px] text-slate-400">
+                                    {{ optional($testCase->testSuite)->name ?? '-' }}
+                                    <span class="text-slate-700">&middot;</span>
+                                    {{ optional($testCase->testSuite?->project)->name ?? '-' }}
+                                </span>
+                            </div>
+                            <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-slate-500 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+
+                        <div x-show="open" class="border-t border-slate-800/80 p-5 pl-8">
+                            @forelse($testCase->testResults as $result)
+                                @php
+                                    $sBadge = match($result->status) {
+                                        'Passed' => 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+                                        'Failed' => 'bg-red-500/10 border-red-500/20 text-red-400',
+                                        'Blocked' => 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+                                        default => 'bg-slate-700/20 border-slate-700 text-slate-400',
+                                    };
+                                @endphp
+                                <div class="flex items-center justify-between py-1.5 text-[11px]">
+                                    <span class="text-slate-500">
+                                        {{ optional($result->testRun)->title ?? 'Test Run tidak diketahui' }}
+                                        <span class="text-slate-700">&middot;</span>
+                                        {{ $result->updated_at->translatedFormat('d M Y, H:i') }}
+                                    </span>
+                                    <span class="px-2.5 py-0.5 rounded-full border text-[10px] font-bold {{ $sBadge }}">{{ $result->status }}</span>
+                                </div>
+                            @empty
+                                <div class="text-[11px] text-slate-600">Belum pernah dijalankan di test run manapun.</div>
+                            @endforelse
+                        </div>
+
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
     </div>
 

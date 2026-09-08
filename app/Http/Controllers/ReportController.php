@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Bug;
 use App\Models\BugHistory;
 use App\Models\Project;
+use App\Models\Requirement;
+use App\Models\TestCase;
+use App\Models\TestResult;
+use App\Models\TestRun;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -43,10 +47,10 @@ class ReportController extends Controller
         }
 
         $histories = $query->paginate(20);
-        
+
         // Get projects and statuses for filter dropdown
         $projects = Project::all();
-        $statuses = ['Open', 'In Progress', 'Done in Review', 'Resolved', 'Closed', 'Reopened'];
+        $statuses = Bug::STATUSES;
 
         return view('reports.bug-history', compact('histories', 'projects', 'statuses'));
     }
@@ -65,5 +69,69 @@ class ReportController extends Controller
         ])->findOrFail($bugId);
 
         return view('reports.bug-detail', compact('bug'));
+    }
+
+    /**
+     * Menampilkan halaman comprehensive reports sebagai
+     * Requirement Traceability Matrix (RTM): Project -> Requirement -> Test Case -> riwayat Test Run.
+     */
+    public function comprehensive(Request $request)
+    {
+        $projects = Project::all();
+        $selectedProject = $request->project_id ? Project::find($request->project_id) : null;
+
+        $requirements = Requirement::with(['project', 'testCases.testResults.testRun'])
+            ->when($request->filled('project_id'), function ($q) use ($request) {
+                $q->where('project_id', $request->project_id);
+            })
+            ->get()
+            // Dikelompokkan per nama project, lalu diurutkan natural per kode requirement (REQ-1, REQ-2, ... REQ-10)
+            ->sortBy(function ($r) {
+                return ($r->project->name ?? '') . '|' . $r->code;
+            }, SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        // Urutkan riwayat test result tiap test case dari yang terbaru
+        $requirements->each(function ($requirement) {
+            $requirement->testCases->each(function ($testCase) {
+                $testCase->setRelation(
+                    'testResults',
+                    $testCase->testResults->sortByDesc(function ($result) {
+                        return optional($result->testRun)->created_at ?? $result->created_at;
+                    })->values()
+                );
+            });
+        });
+
+        $totalRequirements = $requirements->count();
+        $requirementsWithTestCase = $requirements->filter(fn ($r) => $r->testCases->isNotEmpty())->count();
+        $totalTestCases = $requirements->sum(fn ($r) => $r->testCases->count());
+        $coveragePercent = $totalRequirements > 0
+            ? round(($requirementsWithTestCase / $totalRequirements) * 100)
+            : 0;
+
+        // Test case yang belum terhubung ke requirement mana pun (misal hasil generate dari template)
+        $orphanTestCases = TestCase::whereNull('requirement_id')
+            ->with(['testSuite.project', 'testResults.testRun'])
+            ->when($request->filled('project_id'), function ($q) use ($request) {
+                $q->whereHas('testSuite', function ($subQ) use ($request) {
+                    $subQ->where('project_id', $request->project_id);
+                });
+            })
+            ->get()
+            ->each(function ($testCase) {
+                $testCase->setRelation(
+                    'testResults',
+                    $testCase->testResults->sortByDesc(function ($result) {
+                        return optional($result->testRun)->created_at ?? $result->created_at;
+                    })->values()
+                );
+            });
+
+        return view('reports.comprehensive', compact(
+            'projects', 'selectedProject', 'requirements',
+            'totalRequirements', 'requirementsWithTestCase', 'totalTestCases', 'coveragePercent',
+            'orphanTestCases'
+        ));
     }
 }

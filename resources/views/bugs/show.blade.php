@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Bug - QA Management</title>
+    <title>Detail Bug - TESTIFY</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -252,7 +252,7 @@
 </head>
 
 
-@if(auth()->user()->role === 'Developer')
+@if(auth()->user()->isDeveloper())
 
 <body
     class="min-h-full font-sans text-slate-100 overflow-y-auto bg-[#0b0f19]"
@@ -268,7 +268,7 @@
 
 
 {{-- SIDEBAR (Admin & QA) --}}
-@if(auth()->user()->role !== 'Developer')
+@if(! auth()->user()->isDeveloper())
 
     <x-sidebar />
 
@@ -276,10 +276,10 @@
 
 
 {{-- MAIN WRAPPER --}}
-<div class="{{ auth()->user()->role !== 'Developer' ? 'flex-1 flex flex-col min-w-0 overflow-y-auto h-full' : '' }}">
+<div class="{{ ! auth()->user()->isDeveloper() ? 'flex-1 flex flex-col min-w-0 overflow-y-auto h-full' : '' }}">
 
 
-    @if(auth()->user()->role !== 'Developer')
+    @if(! auth()->user()->isDeveloper())
 
         {{-- TOPBAR: Non-Developer --}}
         <header
@@ -365,7 +365,7 @@
                         class="w-9 h-9 rounded-xl object-cover">
 
                     <span class="font-bold text-lg text-white tracking-wide">
-                        QA Platform
+                        TESTIFY
                     </span>
 
                 </div>
@@ -636,7 +636,7 @@
 
     {{-- MAIN --}}
     <main
-        class="{{ auth()->user()->role === 'Developer' ? 'p-8 space-y-6 max-w-7xl mx-auto w-full' : 'p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full space-y-6' }}">
+        class="{{ auth()->user()->isDeveloper() ? 'p-8 space-y-6 max-w-7xl mx-auto w-full' : 'p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full space-y-6' }}">
 
 
         {{-- HERO HEADER CARD --}}
@@ -772,14 +772,14 @@
                             $sc = match($bug->status) {
                                 'Open' => 'badge-open',
                                 'In Progress' => 'badge-progress',
-                                'Resolved', 'Closed', 'Done in Review' => 'badge-resolved',
+                                'Resolved', 'Done in Review' => 'badge-resolved',
                                 default => 'badge-other',
                             };
 
                             $sd = match($bug->status) {
                                 'Open' => '#f87171',
                                 'In Progress' => '#818cf8',
-                                'Resolved', 'Closed', 'Done in Review' => '#34d399',
+                                'Resolved', 'Done in Review' => '#34d399',
                                 default => '#c084fc',
                             };
                         @endphp
@@ -1000,6 +1000,71 @@
                                             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
 
                                     </svg>
+
+                                    Buka di Tab Baru
+
+                                </span>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+                @endif
+
+                {{-- FIX ATTACHMENT (bukti perbaikan dari developer) --}}
+                @if($bug->fix_attachment_url)
+
+                    <div
+                        class="card p-6 fade-up"
+                        style="animation-delay:0.18s;">
+
+                        <div class="flex items-center gap-3 mb-5">
+
+                            <div
+                                class="section-icon"
+                                style="background:rgba(52,211,153,0.12);">
+
+                                <svg
+                                    class="w-4 h-4 text-emerald-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12.75l2.25 2.25 7.5-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="text-sm font-bold text-white">
+                                Bukti Perbaikan (Developer)
+                            </h3>
+
+                        </div>
+
+
+                        <a
+                            href="{{ $bug->fix_attachment_url }}"
+                            target="_blank"
+                            class="attach-wrap">
+
+                            <img
+                                src="{{ $bug->fix_attachment_url }}"
+                                alt="Bug Fix Attachment"
+                                class="w-full h-auto object-cover max-h-[420px]">
+
+                            <div class="attach-overlay">
+
+                                <span
+                                    class="px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-2"
+                                    style="background:rgba(16,185,129,0.8);backdrop-filter:blur(8px);">
 
                                     Buka di Tab Baru
 
@@ -1295,7 +1360,7 @@
                                     $bug->due_date->isPast() &&
                                     !in_array(
                                         $bug->status,
-                                        ['Resolved', 'Closed', 'Done in Review']
+                                        ['Resolved', 'Done in Review']
                                     );
                             @endphp
 
@@ -1409,7 +1474,7 @@
 
 
                 {{-- QUICK ACTIONS --}}
-                @if(auth()->user()->role === 'Developer')
+                @if(auth()->user()->isDeveloper())
 
                     <div class="card p-5">
 

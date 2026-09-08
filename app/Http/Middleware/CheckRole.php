@@ -14,10 +14,7 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        $userRole = strtolower($request->user()->role ?? '');
-        $allowedRoles = array_map('strtolower', $roles);
-
-        if (!in_array($userRole, $allowedRoles)) {
+        if (! $request->user() || ! $request->user()->hasRole(...$roles)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 

@@ -28,7 +28,10 @@ class TestSuiteController extends Controller
                 ->where('project_id', $selectedProjectId)
                 ->get();
 
-            $requirements = Requirement::where('project_id', $selectedProjectId)->get();
+            $requirements = Requirement::where('project_id', $selectedProjectId)
+                ->get()
+                ->sortBy('code', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
         }
 
         return view('test-suites.index', compact('projects', 'testSuites', 'requirements', 'selectedProjectId'));
@@ -60,15 +63,24 @@ class TestSuiteController extends Controller
     public function storeCase(Request $request)
     {
         $request->validate([
-            'test_suite_id' => 'required|exists:test_suites,id',
-            'requirement_id' => 'nullable|exists:requirements,id',
-            'title' => 'required|string|max:255',
-            'steps' => 'required|string',
-            'expected_result' => 'required|string',
-            'priority' => 'required|in:Low,Medium,High,Critical',
+            'test_suite_id'   => 'required|exists:test_suites,id',
+            'requirement_id'  => 'nullable|exists:requirements,id',
+            'test_case_code'  => 'nullable|string|max:50',
+            'title'           => 'required|string|max:255',
+            'steps'           => 'nullable|string',        // opsional — detail ada di sub-steps
+            'expected_result' => 'nullable|string',
+            'priority'        => 'required|in:Low,Medium,High,Critical',
         ]);
 
-        TestCase::create($request->all());
+        TestCase::create($request->only([
+            'test_suite_id',
+            'requirement_id',
+            'test_case_code',
+            'title',
+            'steps',
+            'expected_result',
+            'priority',
+        ]));
 
         $suite = TestSuite::findOrFail($request->test_suite_id);
         return redirect()->route('test-suites.index', ['project_id' => $suite->project_id])
@@ -79,13 +91,27 @@ class TestSuiteController extends Controller
     {
         $request->validate([
             'test_case_id' => 'required|exists:test_cases,id',
-            'step_number' => 'required|integer|min:1',
             'description' => 'required|string',
-            'expected_result' => 'required|string',
+            'expected_result' => 'nullable|string',
         ]);
 
         $testCase = TestCase::findOrFail($request->test_case_id);
-        $testCase->subSteps()->create($request->only(['step_number', 'description', 'expected_result']));
+
+        // Nomor langkah dibuat otomatis mengikuti urutan (max + 1), tidak lagi diinput manual.
+        $nextStepNumber = ((int) $testCase->subSteps()->max('step_number')) + 1;
+
+        $step = $testCase->subSteps()->create([
+            'step_number' => $nextStepNumber,
+            'description' => $request->description,
+            'expected_result' => $request->expected_result,
+        ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Langkah uji berhasil ditambahkan.',
+                'step' => $step,
+            ]);
+        }
 
         return redirect()->route('test-suites.index', ['project_id' => $testCase->test_suite_id ? $testCase->testSuite->project_id : null])
                          ->with('success', 'Langkah uji berhasil ditambahkan.');
@@ -99,5 +125,29 @@ class TestSuiteController extends Controller
 
         return redirect()->route('test-suites.index', ['project_id' => $suite->project_id])
                          ->with('success', 'Test Case berhasil dihapus.');
+    }
+
+    public function updateCase(Request $request, int $id)
+    {
+        $request->validate([
+            'requirement_id'  => 'nullable|exists:requirements,id',
+            'test_case_code'  => 'nullable|string|max:50',
+            'title'           => 'required|string|max:255',
+            'expected_result' => 'nullable|string',
+            'priority'        => 'required|in:Low,Medium,High,Critical',
+        ]);
+
+        $testCase = TestCase::findOrFail($id);
+        $testCase->update($request->only([
+            'requirement_id',
+            'test_case_code',
+            'title',
+            'expected_result',
+            'priority',
+        ]));
+
+        $suite = $testCase->testSuite;
+        return redirect()->route('test-suites.index', ['project_id' => $suite->project_id])
+                         ->with('success', 'Test Case berhasil diperbarui.');
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyek - QA Management</title>
+    <title>Proyek - TESTIFY</title>
     <meta name="description" content="Kelola seluruh proyek pengujian kualitas Anda dalam satu platform terpusat.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -119,7 +119,7 @@
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{
     showAddModal: false,
     showEditModal: false,
-    editForm: { id: '', name: '', description: '', status: 'Aktif', test_plan: { scope: '', objective: '', resource: '', schedule: '', risk: '' } },
+    editForm: { id: '', name: '', description: '', status: 'Aktif', test_plan: { scope: '', objective: '', resource: '', schedule_start: '', schedule_end: '', risk: '' } },
     sidebarOpen: false,
     collapsed: false
     }">
@@ -175,7 +175,6 @@
                     <h1 class="text-3xl font-black tracking-tight">
                         <span class="text-3xl font-bold text-white tracking-tight">Daftar Proyek</span>
                     </h1>
-                    <p class="text-slate-400 text-sm mt-1.5">Kelola semua proyek pengujian kualitas Anda di sini.</p>
                 </div>
                 <div class="flex items-center gap-2 bg-white/5 rounded-xl p-1 border border-white/6 self-start sm:self-auto">
                     <button id="view-grid" onclick="setView('grid')" class="view-btn active p-2 rounded-lg transition cursor-pointer" title="Grid View">
@@ -257,7 +256,7 @@
                                                 name: '{{ $project->name }}',
                                                 description: '{{ $project->description }}',
                                                 status: '{{ $project->status ?? 'Aktif' }}',
-                                                test_plan: {{ Js::from($project->test_plan ?? ['scope'=>'','objective'=>'','resource'=>'','schedule'=>'','risk'=>'']) }}
+                                                test_plan: {{ Js::from($project->test_plan ?? ['scope'=>'','objective'=>'','resource'=>'','schedule_start'=>'','schedule_end'=>'','risk'=>'']) }}
                                             }"
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 transition cursor-pointer" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,14 +402,18 @@
                         <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Objective</label>
                         <textarea name="test_plan[objective]" rows="2" placeholder="Tujuan pengujian..." class="form-input resize-none"></textarea>
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Resource</label>
+                        <input type="text" name="test_plan[resource]" placeholder="3 QA Engineer" class="form-input">
+                    </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Resource</label>
-                            <input type="text" name="test_plan[resource]" placeholder="3 QA Engineer" class="form-input">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Schedule Mulai</label>
+                            <input type="date" name="test_plan[schedule_start]" class="form-input">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Schedule</label>
-                            <input type="text" name="test_plan[schedule]" placeholder="12–20 Agt 2026" class="form-input">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Schedule Selesai</label>
+                            <input type="date" name="test_plan[schedule_end]" class="form-input">
                         </div>
                     </div>
                     <div>
@@ -494,14 +497,18 @@
                         <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Objective</label>
                         <textarea name="test_plan[objective]" rows="2" x-model="editForm.test_plan.objective" class="form-input resize-none"></textarea>
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Resource</label>
+                        <input type="text" name="test_plan[resource]" x-model="editForm.test_plan.resource" class="form-input">
+                    </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Resource</label>
-                            <input type="text" name="test_plan[resource]" x-model="editForm.test_plan.resource" class="form-input">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Schedule Mulai</label>
+                            <input type="date" name="test_plan[schedule_start]" x-model="editForm.test_plan.schedule_start" class="form-input">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Schedule</label>
-                            <input type="text" name="test_plan[schedule]" x-model="editForm.test_plan.schedule" class="form-input">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5">Schedule Selesai</label>
+                            <input type="date" name="test_plan[schedule_end]" x-model="editForm.test_plan.schedule_end" class="form-input">
                         </div>
                     </div>
                     <div>

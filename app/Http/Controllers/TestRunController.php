@@ -12,10 +12,17 @@ use App\Models\TestSuite;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\FileUploadService;
 
 class TestRunController extends Controller
 {
+    public function __construct(
+        protected FileUploadService $fileUploadService,
+    ) {
+    }
+
     public function index(Request $request)
     {
         $projects = Project::with('testSuites')->get();
@@ -38,28 +45,32 @@ class TestRunController extends Controller
             'title'         => 'required|string|max:255',
         ]);
 
-        $testRun = TestRun::create([
-            'project_id' => $request->project_id,
-            'title'      => $request->title,
-            'status'     => 'Active',
-        ]);
-
         $testSuitesQuery = TestSuite::where('project_id', $request->project_id)->with('testCases');
         if ($request->test_suite_id) {
             $testSuitesQuery->where('id', $request->test_suite_id);
         }
         $testSuites = $testSuitesQuery->get();
 
-        foreach ($testSuites as $suite) {
-            foreach ($suite->testCases as $testCase) {
-                TestResult::create([
-                    'test_run_id'  => $testRun->id,
-                    'test_case_id' => $testCase->id,
-                    'status'       => 'Untested',
-                    'executed_by'  => Auth::id() ?? 1,
-                ]);
+        $testRun = DB::transaction(function () use ($request, $testSuites) {
+            $testRun = TestRun::create([
+                'project_id' => $request->project_id,
+                'title'      => $request->title,
+                'status'     => TestRun::STATUS_ACTIVE,
+            ]);
+
+            foreach ($testSuites as $suite) {
+                foreach ($suite->testCases as $testCase) {
+                    TestResult::create([
+                        'test_run_id'  => $testRun->id,
+                        'test_case_id' => $testCase->id,
+                        'status'       => TestResult::STATUS_UNTESTED,
+                        'executed_by'  => Auth::id() ?? 1,
+                    ]);
+                }
             }
-        }
+
+            return $testRun;
+        });
 
         return response()->json([
             'message' => 'Test Run berhasil dimulai!',
@@ -79,7 +90,7 @@ class TestRunController extends Controller
     {
 
         $request->validate([
-            'status'          => 'required|in:Passed,Failed,Blocked,Untested',
+            'status'          => 'required|in:' . implode(',', TestResult::STATUSES),
             'bug_title'       => 'required_if:status,Failed|nullable|string|max:255',
             'bug_description' => 'required_if:status,Failed|nullable|string',
             'expected_result' => 'nullable|string',
@@ -92,100 +103,67 @@ class TestRunController extends Controller
 
         $testResult = TestResult::with(['testCase.testSuite.project'])->findOrFail($testResultId);
         $reporter   = Auth::user();
-        // ── Update status test result ─────────────────────────────────────
-        $testResult->update([
-            'status'      => $request->status,
-            'executed_by' => Auth::id() ?? 1,
-        ]);
 
-        $bug = null;
-
-        // ── Jika Failed → buat Bug baru ───────────────────────────────────
-        if ($request->status === 'Failed') {
-            $attachmentPath = null;
-            if ($request->hasFile('attachment')) {
-                $file      = $request->file('attachment');
-                $filename  = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $directory = public_path('uploads/bug-attachments');
-                if (!is_dir($directory)) {
-                    mkdir($directory, 0755, true);
-                }
-                $file->move($directory, $filename);
-                $attachmentPath = 'bug-attachments/' . $filename;
-            }
-
-            $bug = Bug::create([
-                'test_result_id'  => $testResult->id,
-                'title'           => $request->bug_title,
-                'description'     => $request->bug_description,
-                'expected_result' => $request->expected_result ?? $testResult->testCase?->expected_result,
-                'status'          => 'Open',
-                'assigned_to'     => $request->assigned_to,
-                'reported_by'     => Auth::id(),
-                'due_date'        => $request->due_date,
-                'attachment'      => $attachmentPath,
-            ]);
-
-            // ── Notifikasi ke Developer yang di-assign ────────────────────
-            if ($bug->assigned_to) {
-                $projectName  = $testResult->testCase?->testSuite?->project?->name ?? 'Project';
-                $reporterName = $reporter?->name ?? 'QA Tester';
-
-                BugNotification::create([
-                    'user_id' => $bug->assigned_to,
-                    'bug_id'  => $bug->id,
-                    'type'    => 'bug_reported',
-                    'message' => "🐛 Bug baru dilaporkan oleh {$reporterName} pada project \"{$projectName}\": \"{$bug->title}\". Segera ditangani!",
-                    'is_read' => false,
-                ]);
-            }
-
-            // ── Notifikasi ke Admin tentang bug baru ──────────────────────
-            $admins = User::where('role', 'Admin')->get();
-            foreach ($admins as $admin) {
-                BugNotification::create([
-                    'user_id' => $admin->id,
-                    'bug_id'  => $bug->id,
-                    'type'    => 'bug_reported',
-                    'message' => "📋 Bug baru: \"{$bug->title}\" dilaporkan dari Test Run.",
-                    'is_read' => false,
-                ]);
-            }
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $this->fileUploadService->store($request->file('attachment'), 'bug-attachments');
         }
 
-        // ── Jika Passed → update status bug terkait jadi Closed ──────────
-        if ($request->status === 'Passed') {
-            $existingBug = Bug::where('test_result_id', $testResult->id)
-                ->whereNotIn('status', ['Closed', 'Done'])
-                ->first();
+        $bug = DB::transaction(function () use ($request, $testResult, $reporter, $attachmentPath) {
+            // ── Update status test result ─────────────────────────────────
+            $testResult->update([
+                'status'      => $request->status,
+                'executed_by' => Auth::id() ?? 1,
+            ]);
 
-            if ($existingBug) {
-                $existingBug->update([
-                    'status'      => 'Closed',
-                    'finish_date' => now()->toDateString(),
+            $bug = null;
+
+            // ── Jika Failed → buat Bug baru ───────────────────────────────
+            if ($request->status === TestResult::STATUS_FAILED) {
+                $bug = Bug::create([
+                    'test_result_id'  => $testResult->id,
+                    'title'           => $request->bug_title,
+                    'description'     => $request->bug_description,
+                    'expected_result' => $request->expected_result ?? $testResult->testCase?->expected_result,
+                    'status'          => Bug::STATUS_OPEN,
+                    'assigned_to'     => $request->assigned_to,
+                    'reported_by'     => Auth::id(),
+                    'due_date'        => $request->due_date,
+                    'attachment'      => $attachmentPath,
                 ]);
 
-                // Notifikasi ke QA yang melaporkan bahwa bug selesai via retest
-                if ($existingBug->reported_by) {
+                // ── Notifikasi ke Developer yang di-assign ────────────────
+                if ($bug->assigned_to) {
+                    $projectName  = $testResult->testCase?->testSuite?->project?->name ?? 'Project';
+                    $reporterName = $reporter?->name ?? 'QA Tester';
+
                     BugNotification::create([
-                        'user_id' => $existingBug->reported_by,
-                        'bug_id'  => $existingBug->id,
-                        'type'    => 'bug_resolved',
-                        'message' => "✅ Bug \"{$existingBug->title}\" telah berhasil di-retest dan dinyatakan Closed.",
+                        'user_id' => $bug->assigned_to,
+                        'bug_id'  => $bug->id,
+                        'type'    => 'bug_reported',
+                        'message' => "🐛 Bug baru dilaporkan oleh {$reporterName} pada project \"{$projectName}\": \"{$bug->title}\". Segera ditangani!",
+                        'is_read' => false,
+                    ]);
+                }
+
+                // ── Notifikasi ke Admin tentang bug baru ──────────────────
+                $admins = User::where('role', 'Admin')->get();
+                foreach ($admins as $admin) {
+                    BugNotification::create([
+                        'user_id' => $admin->id,
+                        'bug_id'  => $bug->id,
+                        'type'    => 'bug_reported',
+                        'message' => "📋 Bug baru: \"{$bug->title}\" dilaporkan dari Test Run.",
                         'is_read' => false,
                     ]);
                 }
             }
-        }
 
-        // ── Auto-update status Test Run jadi Completed ────────────────────
-        $testRun = $testResult->testRun;
-        if ($testRun) {
-            $stillUntested = $testRun->testResults()->whereNotIn('status', ['Passed', 'Failed', 'Blocked'])->exists();
-            if (!$stillUntested) {
-                $testRun->update(['status' => 'Completed']);
-            }
-        }
+            return $bug;
+        });
+
+        // Status Bug sekarang ditentukan oleh BugController saat QA melakukan retest.
+        // Lifecycle Test Run ditangani satu sumber saja: SyncBugAndTestRunStatus listener.
 
         return response()->json([
             'message'     => 'Hasil tes berhasil diperbarui!',
@@ -198,7 +176,7 @@ class TestRunController extends Controller
     {
         $request->validate([
             'title'  => 'required|string|max:255',
-            'status' => 'required|in:Active,Completed',
+            'status' => 'required|in:' . implode(',', TestRun::STATUSES),
         ]);
 
         $testRun = TestRun::findOrFail($id);
@@ -227,17 +205,17 @@ class TestRunController extends Controller
 
         $results  = $testRun->testResults;
         $total    = $results->count();
-        $passed   = $results->where('status', 'Passed')->count();
-        $failed   = $results->where('status', 'Failed')->count();
-        $blocked  = $results->where('status', 'Blocked')->count();
-        $untested = $results->where('status', 'Untested')->count();
+        $passed   = $results->where('status', TestResult::STATUS_PASSED)->count();
+        $failed   = $results->where('status', TestResult::STATUS_FAILED)->count();
+        $blocked  = $results->where('status', TestResult::STATUS_BLOCKED)->count();
+        $untested = $results->where('status', TestResult::STATUS_UNTESTED)->count();
         $passRate = $total > 0 ? round(($passed / $total) * 100) : 0;
 
         $bugs = $results->flatMap(fn($r) => $r->bugs)->values();
 
         $blockingBugs = $bugs->filter(function ($bug) {
             $priority = $bug->testResult?->testCase?->priority ?? 'Low';
-            return in_array($priority, ['Critical', 'High']) && !in_array($bug->status, ['Closed', 'Done']);
+            return in_array($priority, ['Critical', 'High']) && !in_array($bug->status, ['Resolved']);
         });
 
         $isReady = $blockingBugs->isEmpty() && $untested === 0;

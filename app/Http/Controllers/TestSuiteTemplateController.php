@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\TestSuite;
 use App\Models\TestSuiteTemplate;
 use App\Models\TestCaseTemplate;
+use App\Models\TestCaseStepTemplate;
 use App\Models\TestCase;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TestSuiteTemplateController extends Controller
 {
@@ -34,25 +36,42 @@ class TestSuiteTemplateController extends Controller
             'test_suite_id' => 'required|exists:test_suites,id',
         ]);
 
-        $suite = TestSuite::with('testCases')->findOrFail($request->test_suite_id);
+        $suite = TestSuite::with('testCases.subSteps')->findOrFail($request->test_suite_id);
 
-        // Buat template baru (copy nama & deskripsi suite)
-        $template = TestSuiteTemplate::create([
-            'name'        => $suite->name,
-            'description' => $suite->description ?? null,
-            'created_by'  => Auth::id(),
-        ]);
-
-        // Copy semua test case ke tabel test_case_templates
-        foreach ($suite->testCases as $tc) {
-            TestCaseTemplate::create([
-                'test_suite_template_id' => $template->id,
-                'title'                  => $tc->title,
-                'steps'                  => $tc->steps,
-                'expected_result'        => $tc->expected_result,
-                'priority'               => $tc->priority,
+        // Dibungkus transaction: kalau ada satu test case/sub step yang gagal
+        // di-copy di tengah jalan, semua di-rollback — tidak ada template
+        // "setengah jadi" yang tersimpan.
+        $template = DB::transaction(function () use ($suite) {
+            // Buat template baru (copy nama & deskripsi suite)
+            $template = TestSuiteTemplate::create([
+                'name'        => $suite->name,
+                'description' => $suite->description ?? null,
+                'created_by'  => Auth::id(),
             ]);
-        }
+
+            // Copy semua test case ke tabel test_case_templates (beserta sub step-nya)
+            foreach ($suite->testCases as $tc) {
+                $testCaseTemplate = TestCaseTemplate::create([
+                    'test_suite_template_id' => $template->id,
+                    'test_case_code'         => $tc->test_case_code,
+                    'title'                  => $tc->title,
+                    'steps'                  => $tc->steps,
+                    'expected_result'        => $tc->expected_result,
+                    'priority'               => $tc->priority,
+                ]);
+
+                foreach ($tc->subSteps as $subStep) {
+                    TestCaseStepTemplate::create([
+                        'test_case_template_id' => $testCaseTemplate->id,
+                        'step_number'           => $subStep->step_number,
+                        'description'           => $subStep->description,
+                        'expected_result'       => $subStep->expected_result,
+                    ]);
+                }
+            }
+
+            return $template;
+        });
 
         return redirect()
             ->route('test-suites.index', ['project_id' => $suite->project_id])
@@ -104,34 +123,49 @@ class TestSuiteTemplateController extends Controller
             'requirement_ids.*' => 'nullable|exists:requirements,id',
         ]);
 
-        $template = TestSuiteTemplate::with('testCaseTemplates')->findOrFail($request->template_id);
+        $template = TestSuiteTemplate::with('testCaseTemplates.subStepTemplates')->findOrFail($request->template_id);
 
         // Nama suite baru — pakai custom name jika diisi, fallback ke nama template
         $suiteName = $request->suite_name ?: $template->name;
 
-        // Buat Test Suite baru di project tujuan
-        $newSuite = TestSuite::create([
-            'project_id' => $request->project_id,
-            'name'       => $suiteName,
-        ]);
-
         // requirement_ids dikirim sebagai array [tct_id => req_id]
         $requirementIds = $request->input('requirement_ids', []);
 
-        foreach ($template->testCaseTemplates as $tct) {
-            $requirementId = isset($requirementIds[$tct->id]) && $requirementIds[$tct->id] !== ''
-                ? $requirementIds[$tct->id]
-                : null;
-
-            TestCase::create([
-                'test_suite_id'   => $newSuite->id,
-                'requirement_id'  => $requirementId,
-                'title'           => $tct->title,
-                'steps'           => $tct->steps ?? '',
-                'expected_result' => $tct->expected_result ?? '',
-                'priority'        => $tct->priority,
+        // Dibungkus transaction: kalau generate test case/sub step gagal
+        // di tengah jalan, suite baru yang sudah kebentuk ikut di-rollback
+        // juga — tidak ada suite kosong/setengah jadi yang nyangkut.
+        DB::transaction(function () use ($template, $suiteName, $requirementIds, $request) {
+            // Buat Test Suite baru di project tujuan
+            $newSuite = TestSuite::create([
+                'project_id' => $request->project_id,
+                'name'       => $suiteName,
             ]);
-        }
+
+            foreach ($template->testCaseTemplates as $tct) {
+                $requirementId = isset($requirementIds[$tct->id]) && $requirementIds[$tct->id] !== ''
+                    ? $requirementIds[$tct->id]
+                    : null;
+
+                $newTestCase = TestCase::create([
+                    'test_suite_id'   => $newSuite->id,
+                    'requirement_id'  => $requirementId,
+                    'test_case_code'  => $tct->test_case_code,
+                    'title'           => $tct->title,
+                    'steps'           => $tct->steps ?? '',
+                    'expected_result' => $tct->expected_result ?? '',
+                    'priority'        => $tct->priority,
+                ]);
+
+                // Sub step ikut di-generate ulang ke test case baru
+                foreach ($tct->subStepTemplates as $subStepTemplate) {
+                    $newTestCase->subSteps()->create([
+                        'step_number'     => $subStepTemplate->step_number,
+                        'description'     => $subStepTemplate->description,
+                        'expected_result' => $subStepTemplate->expected_result,
+                    ]);
+                }
+            }
+        });
 
         return redirect()
             ->route('test-suites.index', ['project_id' => $request->project_id])

@@ -9,6 +9,14 @@ class TestRun extends Model
 {
     use HasFactory;
 
+    public const STATUS_ACTIVE = 'Active';
+    public const STATUS_COMPLETED = 'Completed';
+
+    public const STATUSES = [
+        self::STATUS_ACTIVE,
+        self::STATUS_COMPLETED,
+    ];
+
     protected $fillable = ['project_id', 'title', 'status'];
 
     public function project()

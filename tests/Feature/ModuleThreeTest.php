@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('test run completes automatically when all results are done and bug passes trigger done status', function () {
+test('test run completes automatically when all results are done without changing bug workflow status', function () {
     $project = Project::create([
         'name' => 'Module 3 Project',
         'description' => 'Project untuk modul 3',
@@ -75,6 +75,6 @@ test('test run completes automatically when all results are done and bug passes 
     $testRun->testResults()->update(['status' => 'Passed']);
     $testRun->refresh();
 
-    expect($bug->status)->toBe('Done')
+    expect($bug->status)->toBe('Open')
         ->and($testRun->status)->toBe('Completed');
 });

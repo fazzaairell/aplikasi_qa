@@ -2,53 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\BugStatusChanged;
+use App\Http\Requests\StoreBugRequest;
+use App\Http\Requests\UpdateBugStatusRequest;
 use App\Models\Bug;
 use App\Models\BugNotification;
+use App\Models\Project;
 use App\Models\User;
+use App\Services\BugStatusService;
+use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class BugController extends Controller
 {
+    public function __construct(
+        protected FileUploadService $fileUploadService,
+        protected BugStatusService $bugStatusService,
+    ) {
+    }
+
     /**
      * Daftar bug aktif (project status != Selesai)
      */
     public function index(Request $request)
     {
-        $query = Bug::with([
-            'testResult.testCase.testSuite.project',
-            'testResult.testCase.requirement',
-            'assignee',
-            'reporter',
-            'testResult.testRun',
-        ])
-        ->whereHas('testResult.testCase.testSuite.project', function ($q) {
-            $q->where('status', '!=', 'Selesai');
-        });
+        $bugs = $this->filteredBugsQuery($request, projectDone: false)->latest()->get();
 
-        if ($request->filled('status') && $request->status !== 'All') {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('project_id')) {
-            $query->whereHas('testResult.testCase.testSuite.project', fn($q) =>
-                $q->where('id', $request->project_id)
-            );
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $bugs     = $query->latest()->get();
-        $projects = \App\Models\Project::where('status', '!=', 'Selesai')->get();
-        $developers = \App\Models\User::where('role', 'Developer')->get();
-        $isHistory = false;
-
-        return view('bugs.index', compact('bugs', 'isHistory', 'projects', 'developers'));
+        return view('bugs.index', [
+            'bugs' => $bugs,
+            'isHistory' => false,
+            'projects' => Project::where('status', '!=', 'Selesai')->get(),
+            'developers' => User::where('role', 'Developer')->get(),
+        ]);
     }
 
     /**
@@ -56,22 +41,37 @@ class BugController extends Controller
      */
     public function history(Request $request)
     {
+        $bugs = $this->filteredBugsQuery($request, projectDone: true)->latest()->get();
+
+        return view('bugs.index', [
+            'bugs' => $bugs,
+            'isHistory' => true,
+            'projects' => Project::where('status', '=', 'Selesai')->get(),
+            'developers' => User::where('role', 'Developer')->get(),
+        ]);
+    }
+
+    /**
+     * Query dasar daftar bug + filter yang dipakai bareng oleh index() & history().
+     * Bedanya cuma status project (aktif vs sudah Selesai) dan filter tambahan dari request.
+     */
+    protected function filteredBugsQuery(Request $request, bool $projectDone)
+    {
         $query = Bug::with([
             'testResult.testCase.testSuite.project',
             'testResult.testCase.requirement',
             'assignee',
             'reporter',
             'testResult.testRun',
-        ])
-        ->whereHas('testResult.testCase.testSuite.project', fn($q) =>
-            $q->where('status', '=', 'Selesai')
-        );
+        ])->whereHas('testResult.testCase.testSuite.project', function ($q) use ($projectDone) {
+            $q->where('status', $projectDone ? '=' : '!=', 'Selesai');
+        });
 
         if ($request->filled('status') && $request->status !== 'All') {
             $query->where('status', $request->status);
         }
         if ($request->filled('project_id')) {
-            $query->whereHas('testResult.testCase.testSuite.project', fn($q) =>
+            $query->whereHas('testResult.testCase.testSuite.project', fn ($q) =>
                 $q->where('id', $request->project_id)
             );
         }
@@ -82,54 +82,45 @@ class BugController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $bugs      = $query->latest()->get();
-        $projects  = \App\Models\Project::where('status', '=', 'Selesai')->get();
-        $developers = \App\Models\User::where('role', 'Developer')->get();
-        $isHistory = true;
-
-        return view('bugs.index', compact('bugs', 'isHistory', 'projects', 'developers'));
+        return $query;
     }
 
     /**
      * Buat bug baru secara standalone (tanpa test result)
      */
-    public function store(Request $request)
+    public function store(StoreBugRequest $request)
     {
-        $request->validate([
-            'title'           => 'required|string|max:255',
-            'description'     => 'required|string',
-            'expected_result' => 'nullable|string',
-            'assigned_to'     => 'required|exists:users,id',
-            'due_date'        => 'required|date',
-            'attachment'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-        ]);
+        $data = $request->validated();
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
-            $file      = $request->file('attachment');
-            $filename  = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $directory = public_path('uploads/bug-attachments');
-            if (!is_dir($directory)) {
-                mkdir($directory, 0755, true);
-            }
-            $file->move($directory, $filename);
-            $attachmentPath = 'bug-attachments/' . $filename;
+            $attachmentPath = $this->fileUploadService->store($request->file('attachment'), 'bug-attachments');
         }
 
         $bug = Bug::create([
             'test_result_id'  => null,
-            'title'           => $request->title,
-            'description'     => $request->description,
-            'expected_result' => $request->expected_result,
-            'status'          => 'Open',
-            'assigned_to'     => $request->assigned_to,
+            'title'           => $data['title'],
+            'description'     => $data['description'],
+            'expected_result' => $data['expected_result'] ?? null,
+            'status'          => Bug::STATUS_OPEN,
+            'assigned_to'     => $data['assigned_to'],
             'reported_by'     => Auth::id(),
-            'due_date'        => $request->due_date,
+            'due_date'        => $data['due_date'],
             'attachment'      => $attachmentPath,
         ]);
 
-        // Notifikasi ke Developer yang di-assign
+        $this->notifyNewBug($bug);
+
+        return back()->with('success', 'Bug berhasil dilaporkan!');
+    }
+
+    /**
+     * Notifikasi ke Developer yang di-assign + semua Admin saat bug baru dilaporkan.
+     */
+    protected function notifyNewBug(Bug $bug): void
+    {
         $reporter = Auth::user();
+
         if ($bug->assigned_to) {
             BugNotification::create([
                 'user_id' => $bug->assigned_to,
@@ -140,7 +131,6 @@ class BugController extends Controller
             ]);
         }
 
-        // Notifikasi ke semua Admin
         $admins = User::where('role', 'Admin')->get();
         foreach ($admins as $admin) {
             BugNotification::create([
@@ -151,8 +141,6 @@ class BugController extends Controller
                 'is_read' => false,
             ]);
         }
-
-        return back()->with('success', 'Bug berhasil dilaporkan!');
     }
 
     /**
@@ -172,121 +160,35 @@ class BugController extends Controller
     }
 
     /**
-     * Update status bug
+     * Update status bug sesuai workflow QA.
      *
-     * Developer  → hanya boleh: In Progress, Done in Review
-     * Admin / QA → bisa semua status
+     * Developer:
+     * Open/Reopened -> In Progress -> Done in Review
+     *
+     * QA Lead / QA Tester / Admin:
+     * Done in Review -> Resolved atau Reopened
+     *
+     * Developer hanya boleh mengubah bug yang ditugaskan kepadanya.
+     * Logic transisi & notifikasi ada di BugStatusService.
      */
-    public function updateStatus(Request $request, int $id)
+    public function updateStatus(UpdateBugStatusRequest $request, int $id)
     {
-        $user = Auth::user();
-        $bug  = Bug::with(['testResult', 'assignee', 'reporter'])->findOrFail($id);
+        $bug = Bug::with(['testResult', 'assignee', 'reporter'])->findOrFail($id);
 
-        if ($user->role === 'Developer') {
-            $request->validate([
-                'status' => 'required|in:In Progress,Done in Review',
-            ]);
-        } else {
-            $request->validate([
-                'status' => 'required|in:Open,In Progress,Done in Review,Resolved,Closed,Reopened',
-            ]);
+        $result = $this->bugStatusService->updateStatus(
+            $bug,
+            Auth::user(),
+            $request->validated('status'),
+            $request->file('fix_attachment')
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $result->message,
+                'data' => $result->bug,
+            ], $result->statusCode);
         }
 
-        $oldStatus = $bug->status;
-        $newStatus = $request->status;
-
-        // Tentukan finish_date otomatis
-        if ($newStatus === 'Reopened') {
-            $finishDate = null;
-        } elseif (in_array($newStatus, ['Resolved', 'Closed', 'Done in Review'])) {
-            $finishDate = $bug->finish_date?->toDateString() ?? now()->toDateString();
-        } else {
-            $finishDate = $bug->finish_date?->toDateString();
-        }
-
-        $bug->update([
-            'status'      => $newStatus,
-            'finish_date' => $finishDate,
-        ]);
-
-        // Fire event untuk history tracking
-        if (class_exists(\App\Events\BugStatusChanged::class)) {
-            try { event(new BugStatusChanged($bug, $oldStatus, $newStatus)); } catch (\Throwable $e) {}
-        }
-
-        // ── Sinkronisasi TestResult ───────────────────────────────────────
-        if ($newStatus === 'Closed' && $bug->testResult) {
-            $bug->testResult->update(['status' => 'Passed']);
-        }
-        if ($newStatus === 'Reopened' && $bug->testResult) {
-            $bug->testResult->update(['status' => 'Failed']);
-        }
-
-        // ── Notifikasi ────────────────────────────────────────────────────
-
-        // 1. Developer selesai perbaiki → beri tahu QA yang melaporkan
-        if ($newStatus === 'Done in Review' && $bug->reported_by) {
-            BugNotification::create([
-                'user_id' => $bug->reported_by,
-                'bug_id'  => $bug->id,
-                'type'    => 'bug_done_review',
-                'message' => "🔔 Bug \"{$bug->title}\" sudah selesai diperbaiki oleh Developer ({$user->name}). Silakan lakukan retest.",
-                'is_read' => false,
-            ]);
-
-            // Juga beri tahu Admin
-            $admins = User::where('role', 'Admin')->get();
-            foreach ($admins as $admin) {
-                BugNotification::create([
-                    'user_id' => $admin->id,
-                    'bug_id'  => $bug->id,
-                    'type'    => 'bug_done_review',
-                    'message' => "📋 Developer {$user->name} menandai bug \"{$bug->title}\" sebagai Done in Review.",
-                    'is_read' => false,
-                ]);
-            }
-        }
-
-        // 2. Developer mulai mengerjakan → beri tahu QA
-        if ($newStatus === 'In Progress' && $oldStatus === 'Open' && $bug->reported_by) {
-            BugNotification::create([
-                'user_id' => $bug->reported_by,
-                'bug_id'  => $bug->id,
-                'type'    => 'bug_in_progress',
-                'message' => "⚙️ Bug \"{$bug->title}\" sedang dalam pengerjaan oleh Developer ({$user->name}).",
-                'is_read' => false,
-            ]);
-        }
-
-        // 3. QA me-reopen bug → beri tahu Developer
-        if ($newStatus === 'Reopened' && $bug->assigned_to) {
-            BugNotification::create([
-                'user_id' => $bug->assigned_to,
-                'bug_id'  => $bug->id,
-                'type'    => 'bug_reopened',
-                'message' => "⚠️ Bug \"{$bug->title}\" di-reopen oleh QA setelah retest gagal. Perlu diperbaiki ulang.",
-                'is_read' => false,
-            ]);
-        }
-
-        // 4. QA menutup bug (Closed) → beri tahu Developer
-        if ($newStatus === 'Closed' && $bug->assigned_to) {
-            BugNotification::create([
-                'user_id' => $bug->assigned_to,
-                'bug_id'  => $bug->id,
-                'type'    => 'bug_closed',
-                'message' => "✅ Bug \"{$bug->title}\" telah ditutup (Closed) oleh QA setelah retest berhasil.",
-                'is_read' => false,
-            ]);
-        }
-
-        if (!$request->expectsJson()) {
-            return back()->with('success', 'Status bug berhasil diperbarui!');
-        }
-
-        return response()->json([
-            'message' => 'Status bug berhasil diperbarui!',
-            'data'    => $bug->fresh(),
-        ]);
+        return back()->with($result->success ? 'success' : 'error', $result->message);
     }
 }

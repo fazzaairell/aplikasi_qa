@@ -69,7 +69,7 @@ test('comprehensive reports page displays all statistics', function () {
         'test_result_id' => $result->id,
         'title' => 'Reports bug',
         'description' => 'Bug for reports test',
-        'status' => 'Closed',
+        'status' => 'Resolved',
         'assigned_to' => $user->id,
         'reported_by' => $user->id,
         'expected_result' => 'Test reports',

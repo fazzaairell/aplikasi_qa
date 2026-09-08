@@ -11,8 +11,9 @@ class TestCaseTemplate extends Model
 
     protected $fillable = [
         'test_suite_template_id',
+        'test_case_code',  // kode unik test case template, misal: TC-001
         'title',
-        'steps',
+        'steps',           // nullable — detail ada di sub-step templates
         'expected_result',
         'priority',
     ];
@@ -23,5 +24,13 @@ class TestCaseTemplate extends Model
     public function testSuiteTemplate()
     {
         return $this->belongsTo(TestSuiteTemplate::class);
+    }
+
+    /**
+     * Sub step (langkah uji rinci) milik test case template ini.
+     */
+    public function subStepTemplates()
+    {
+        return $this->hasMany(TestCaseStepTemplate::class)->orderBy('step_number');
     }
 }

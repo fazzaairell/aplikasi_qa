@@ -69,8 +69,9 @@ class ProjectController extends Controller
     public function requirementsJson(int $id)
     {
         $requirements = Requirement::where('project_id', $id)
-            ->orderBy('code')
-            ->get(['id', 'code', 'description']);
+            ->get(['id', 'code', 'description'])
+            ->sortBy('code', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
 
         return response()->json($requirements);
     }

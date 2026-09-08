@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>{{ $project->name }} - Detail Proyek - QA Management</title>
+<title>{{ $project->name }} - Detail Proyek - TESTIFY</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -547,7 +547,7 @@
                         @endif
 
 
-                        @if(!empty($tp['schedule']))
+                        @if(!empty($tp['schedule_start']) || !empty($tp['schedule_end']) || !empty($tp['schedule']))
 
                             <div class="plan-card p-5">
 
@@ -579,7 +579,13 @@
                                 </div>
 
                                 <p class="text-xs text-slate-300 leading-relaxed">
-                                    {{ $tp['schedule'] }}
+                                    @if(!empty($tp['schedule_start']) || !empty($tp['schedule_end']))
+                                        {{ !empty($tp['schedule_start']) ? \Carbon\Carbon::parse($tp['schedule_start'])->translatedFormat('d M Y') : '—' }}
+                                        &mdash;
+                                        {{ !empty($tp['schedule_end']) ? \Carbon\Carbon::parse($tp['schedule_end'])->translatedFormat('d M Y') : '—' }}
+                                    @else
+                                        {{ $tp['schedule'] ?? '' }}
+                                    @endif
                                 </p>
 
                             </div>
@@ -1033,14 +1039,26 @@
 
                         <div>
                             <label class="lbl">
-                                Schedule
+                                Schedule Mulai
                             </label>
 
                             <input
-                                type="text"
-                                name="test_plan[schedule]"
-                                value="{{ $tp['schedule'] ?? '' }}"
-                                placeholder="Contoh: 12 - 20 Agustus 2026"
+                                type="date"
+                                name="test_plan[schedule_start]"
+                                value="{{ $tp['schedule_start'] ?? '' }}"
+                                class="input-field"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="lbl">
+                                Schedule Selesai
+                            </label>
+
+                            <input
+                                type="date"
+                                name="test_plan[schedule_end]"
+                                value="{{ $tp['schedule_end'] ?? '' }}"
                                 class="input-field"
                             >
                         </div>

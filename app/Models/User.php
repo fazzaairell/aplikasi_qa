@@ -14,6 +14,19 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    public const ROLE_ADMIN = 'Admin';
+    public const ROLE_QA_LEAD = 'QA Lead';
+    public const ROLE_QA_TESTER = 'QA Tester';
+    public const ROLE_DEVELOPER = 'Developer';
+
+    public const ROLES = [
+        self::ROLE_ADMIN,
+        self::ROLE_QA_LEAD,
+        self::ROLE_QA_TESTER,
+        self::ROLE_DEVELOPER,
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -65,5 +78,43 @@ class User extends Authenticatable
     public function assignedBugs()
     {
         return $this->hasMany(Bug::class, 'assigned_to');
+    }
+
+    // --- HELPER ROLE ---
+    // Satu-satunya tempat yang tahu bagaimana cara membandingkan role.
+    // Controller, middleware, dan view semua panggil method ini — supaya
+    // kalau suatu saat nama/penulisan role berubah, cukup diubah di sini.
+
+    public function hasRole(string ...$roles): bool
+    {
+        $userRole = strtolower(trim($this->role ?? ''));
+
+        foreach ($roles as $role) {
+            if ($userRole === strtolower(trim($role))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(self::ROLE_ADMIN);
+    }
+
+    public function isDeveloper(): bool
+    {
+        return $this->hasRole(self::ROLE_DEVELOPER);
+    }
+
+    public function isQa(): bool
+    {
+        return $this->hasRole(self::ROLE_QA_LEAD, self::ROLE_QA_TESTER);
+    }
+
+    public function isQaTester(): bool
+    {
+        return $this->hasRole(self::ROLE_QA_TESTER);
     }
 }

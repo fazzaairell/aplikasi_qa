@@ -1,20 +1,20 @@
 @extends('layouts.topbar')
 
-@section('title', 'Dashboard Developer - QA Platform')
+@section('title', 'Dashboard Developer - TESTIFY')
 
 @section('hero')
 
-    <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mb-1">
+    <!-- <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mb-1 max-w-7xl mx-auto w-full">
         WORKSPACE
     </div>
 
-    <h1 class="text-3xl font-bold text-white tracking-tight">
+    <h1 class="text-3xl font-bold text-white tracking-tight max-w-7xl mx-auto w-full">
         Developer Workspace
     </h1>
 
-    <p class="text-sm text-slate-400 mt-1">
+    <p class="text-sm text-slate-400 mt-1 max-w-7xl mx-auto w-full">
         Ini daftar bug yang perlu kamu tangani.
-    </p>
+    </p> -->
 
 @endsection
 
@@ -91,7 +91,7 @@
     $countProgress = $bugs->where('status', 'In Progress')->count();
     $countResolved = $bugs->where('status', 'Resolved')->count();
     $countReopened = $bugs->where('status', 'Reopened')->count();
-    $countClosed = $bugs->where('status', 'Closed')->count();
+    $countReview = $bugs->where('status', 'Done in Review')->count();
 
 @endphp
 
@@ -158,15 +158,18 @@
     </div>
 
 
+    {{-- FIX: label disamakan dengan status aslinya "Done in Review"
+         (sebelumnya tertulis "Closed" yang membingungkan, karena status
+         "Closed" itu sendiri adalah konsep yang berbeda) --}}
     <div class="rounded-2xl p-4 space-y-1 transition hover:scale-105 duration-200"
          style="background:rgba(100,116,139,0.15); border:1px solid rgba(100,116,139,0.25);">
 
         <div class="text-2xl font-bold text-white">
-            {{ $countClosed }}
+            {{ $countReview }}
         </div>
 
         <div class="text-xs font-semibold" style="color:#94a3b8">
-            Closed
+            Done in Review
         </div>
 
     </div>
@@ -219,7 +222,7 @@
 
 
         <button
-            onclick="devFilter('Closed')"
+            onclick="devFilter('Done in Review')"
             id="df-closed"
             class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-white/[0.06] text-slate-400 hover:text-white transition cursor-pointer"
             style="background:#111827;">
@@ -273,7 +276,7 @@
                     </th>
 
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">
-                        Due Date
+                        Tanggal Test
                     </th>
 
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">
@@ -363,15 +366,6 @@
                             $projectName =
                                 $bug->testResult?->testCase?->testSuite?->project?->name ?? null;
 
-                            $reqTitle =
-                                $bug->testResult?->testCase?->requirement?->title ?? null;
-
-                            $suiteName =
-                                $bug->testResult?->testCase?->testSuite?->name ?? null;
-
-                            $caseName =
-                                $bug->testResult?->testCase?->title ?? null;
-
                             $dueDate =
                                 $bug->due_date;
 
@@ -385,162 +379,83 @@
                             class="bug-row border-b border-white/[0.04] transition"
                             data-status="{{ $bug->status }}">
 
-                            {{-- NO --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap">
-
                                 <span class="text-slate-500 font-mono font-semibold">
                                     {{ $rowNum }}
                                 </span>
-
                             </td>
 
-
-                            {{-- JUDUL BUG --}}
-
                             <td class="px-4 py-3.5">
-
                                 <div
                                     class="font-semibold text-white leading-snug truncate max-w-[200px]"
                                     title="{{ $bug->title }}">
-
                                     {{ $bug->title }}
-
                                 </div>
 
-
                                 @if($bug->description)
-
                                     <div
                                         class="text-slate-500 text-[10px] leading-tight truncate max-w-[200px] mt-0.5"
                                         title="{{ $bug->description }}">
-
                                         {{ $bug->description }}
-
                                     </div>
-
                                 @endif
-
                             </td>
 
-
-                            {{-- PROJECT --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap">
-
                                 @if($projectName)
-
-                                    <span class="text-slate-300">
-                                        {{ $projectName }}
-                                    </span>
-
+                                    <span class="text-slate-300">{{ $projectName }}</span>
                                 @else
-
-                                    <span class="text-slate-600">
-                                        —
-                                    </span>
-
+                                    <span class="text-slate-600">—</span>
                                 @endif
-
                             </td>
 
-
-                            {{-- DUE DATE --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap">
-
                                 @if($dueDate)
-
-                                    <span class="text-slate-400 font-mono text-[11px]">
-                                        {{ $dueDate->format('d M Y') }}
-                                    </span>
-
+                                    <span class="text-slate-400 font-mono text-[11px]">{{ $dueDate->format('d M Y') }}</span>
                                 @else
-
-                                    <span class="text-slate-600">
-                                        —
-                                    </span>
-
+                                    <span class="text-slate-600">—</span>
                                 @endif
-
                             </td>
 
-
-                            {{-- FINISH DATE --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap">
-
                                 @if($bug->finish_date)
-
                                     <span
                                         class="px-2 py-1 rounded-lg text-[10px] font-semibold"
                                         style="background:rgba(16,185,129,0.1); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25);">
-
                                         {{ $bug->finish_date->format('d M Y') }}
-
                                     </span>
-
                                 @else
-
-                                    <span class="text-slate-600">
-                                        —
-                                    </span>
-
+                                    <span class="text-slate-600">—</span>
                                 @endif
-
                             </td>
 
-
-                            {{-- PRIORITY --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap">
-
                                 @if($priority === 'Critical')
-
                                     <span
                                         class="px-2 py-1 rounded-lg text-[9px] font-bold"
                                         style="background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);">
-
                                         🔴 Critical
-
                                     </span>
-
                                 @elseif($priority === 'High')
-
                                     <span
                                         class="px-2 py-1 rounded-lg text-[9px] font-bold"
                                         style="background:rgba(249,115,22,0.12);color:#fdba74;border:1px solid rgba(249,115,22,0.25);">
-
                                         🟠 High
-
                                     </span>
-
                                 @elseif($priority === 'Medium')
-
                                     <span
                                         class="px-2 py-1 rounded-lg text-[9px] font-bold"
                                         style="background:rgba(234,179,8,0.12);color:#fde047;border:1px solid rgba(234,179,8,0.25);">
-
                                         🟡 Medium
-
                                     </span>
-
                                 @else
-
                                     <span
                                         class="px-2 py-1 rounded-lg text-[9px] font-bold"
                                         style="background:rgba(100,116,139,0.12);color:#94a3b8;border:1px solid rgba(100,116,139,0.25);">
-
                                         ⬜ Low
-
                                     </span>
-
                                 @endif
-
                             </td>
-
-
-                            {{-- STATUS DROPDOWN --}}
 
                             <td
                                 class="px-4 py-3.5 whitespace-nowrap"
@@ -552,55 +467,34 @@
                                     class="inline">
 
                                     @csrf
-
                                     @method('PATCH')
-
 
                                     <select
                                         name="status"
-                                        onchange="this.form.submit()"
+                                        data-current-status="{{ $bug->status }}"
+                                        onchange="handleDevBugStatusChange(this)"
                                         class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer outline-none border-2 transition-all bg-[#0c0f1a]"
                                         title="Ubah status"
-                                        @if(in_array($bug->status, ['Resolved', 'Closed', 'Reopened']))
+                                        @if(in_array($bug->status, ['Resolved', 'Reopened']))
                                             disabled
                                         @endif>
 
-                                        <option
-                                            value="Open"
-                                            {{ $bug->status === 'Open' ? 'selected' : '' }}
-                                            style="background:#0c0f1a; color:#fca5a5;"
-                                            disabled>
+                                        <option value="Open" {{ $bug->status === 'Open' ? 'selected' : '' }} style="background:#0c0f1a; color:#fca5a5;" disabled>
                                             Open
                                         </option>
 
-
-                                        <option
-                                            value="In Progress"
-                                            {{ $bug->status === 'In Progress' ? 'selected' : '' }}
-                                            style="background:#0c0f1a; color:#a5b4fc;">
+                                        <option value="In Progress" {{ $bug->status === 'In Progress' ? 'selected' : '' }} style="background:#0c0f1a; color:#a5b4fc;">
                                             In Progress
                                         </option>
 
-
-                                        <option
-                                            value="Done in Review"
-                                            {{ $bug->status === 'Done in Review' ? 'selected' : '' }}
-                                            style="background:#0c0f1a; color:#e2e8f0;">
+                                        <option value="Done in Review" {{ $bug->status === 'Done in Review' ? 'selected' : '' }} style="background:#0c0f1a; color:#e2e8f0;">
                                             Done in Review
                                         </option>
 
-
-                                        @if(in_array($bug->status, ['Resolved', 'Closed', 'Reopened']))
-
-                                            <option
-                                                value="{{ $bug->status }}"
-                                                selected
-                                                style="background:#0c0f1a; color:#e2e8f0;">
-
+                                        @if(in_array($bug->status, ['Resolved', 'Reopened']))
+                                            <option value="{{ $bug->status }}" selected style="background:#0c0f1a; color:#e2e8f0;">
                                                 {{ $bug->status }}
-
                                             </option>
-
                                         @endif
 
                                     </select>
@@ -609,30 +503,16 @@
 
                             </td>
 
-
-                            {{-- DIBUAT --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap">
-
-                                <span class="text-slate-500 font-mono text-[10px]">
-                                    {{ $bug->created_at->format('d M Y') }}
-                                </span>
-
+                                <span class="text-slate-500 font-mono text-[10px]">{{ $bug->created_at->format('d M Y') }}</span>
                             </td>
 
-
-                            {{-- AKSI --}}
-
                             <td class="px-4 py-3.5 whitespace-nowrap text-right">
-
                                 <a
                                     href="{{ route('bugs.show', $bug->id) }}"
                                     class="px-3 py-1.5 bg-[#0b0f19] border border-slate-700/80 hover:bg-indigo-600/20 text-indigo-400 hover:text-indigo-300 text-[10px] font-bold rounded-lg transition">
-
                                     Detail
-
                                 </a>
-
                             </td>
 
                         </tr>
@@ -676,13 +556,8 @@
 
             </div>
 
-
-            <div
-                class="text-slate-400 text-sm font-medium"
-                id="dev-no-filter-msg">
-
+            <div class="text-slate-400 text-sm font-medium" id="dev-no-filter-msg">
                 Tidak ada bug dengan status ini
-
             </div>
 
         </div>
@@ -694,21 +569,14 @@
 
     <div class="px-4 py-3 border-t border-white/[0.04] flex items-center justify-between">
 
-        <span
-            class="text-[11px] text-slate-500"
-            id="dev-row-count">
-
+        <span class="text-[11px] text-slate-500" id="dev-row-count">
             Menampilkan {{ $bugs->count() }} bug
-
         </span>
-
 
         <a
             href="{{ route('bugs.index') }}"
             class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold">
-
             Lihat semua bug &rarr;
-
         </a>
 
     </div>
@@ -720,31 +588,34 @@
 
     let devFilter_current = 'All';
 
+    // FIX: mapping slug eksplisit. Sebelumnya status.toLowerCase() untuk
+    // "Done in Review" menghasilkan "done in review" (ada spasi), padahal
+    // id tombolnya "df-closed" — akibatnya tombol filter tidak pernah
+    // ter-highlight walau filter-nya tetap berfungsi.
+    const devFilterSlugMap = {
+        'All': 'all',
+        'Open': 'open',
+        'In Progress': 'in-progress',
+        'Resolved': 'resolved',
+        'Done in Review': 'closed',
+        'Reopened': 'reopened',
+    };
 
     function devFilter(status) {
 
         devFilter_current = status;
 
-
         document
             .querySelectorAll('.filter-btn')
             .forEach(b => b.classList.remove('active'));
 
+        const slug = devFilterSlugMap[status] ?? status.toLowerCase();
 
-        const slug =
-            status === 'In Progress'
-                ? 'in-progress'
-                : status.toLowerCase();
-
-
-        const btn =
-            document.getElementById('df-' + slug);
-
+        const btn = document.getElementById('df-' + slug);
 
         if (btn) {
             btn.classList.add('active');
         }
-
 
         devApplyFilters();
 
@@ -756,9 +627,7 @@
         const rows =
             document.querySelectorAll('#dev-bugs-tbody .bug-row');
 
-
         let visible = 0;
-
 
         rows.forEach(row => {
 
@@ -766,10 +635,7 @@
                 devFilter_current === 'All' ||
                 row.dataset.status === devFilter_current;
 
-
-            row.style.display =
-                match ? '' : 'none';
-
+            row.style.display = match ? '' : 'none';
 
             if (match) {
                 visible++;
@@ -777,20 +643,14 @@
 
         });
 
-
-        const noFilter =
-            document.getElementById('dev-no-filter');
-
+        const noFilter = document.getElementById('dev-no-filter');
 
         if (rows.length > 0 && visible === 0) {
 
             noFilter.classList.remove('hidden');
 
-
             document.getElementById('dev-no-filter-msg').textContent =
-                'Tidak ada bug dengan status "' +
-                devFilter_current +
-                '"';
+                'Tidak ada bug dengan status "' + devFilter_current + '"';
 
         } else {
 
@@ -798,33 +658,20 @@
 
         }
 
-
-        const cnt =
-            document.getElementById('dev-row-count');
-
+        const cnt = document.getElementById('dev-row-count');
 
         if (cnt) {
-
-            cnt.textContent =
-                'Menampilkan ' +
-                visible +
-                ' bug';
-
+            cnt.textContent = 'Menampilkan ' + visible + ' bug';
         }
 
-
         // Re-number
-
         let no = 1;
-
 
         rows.forEach(row => {
 
             if (row.style.display !== 'none') {
 
-                const cell =
-                    row.querySelector('td:first-child span');
-
+                const cell = row.querySelector('td:first-child span');
 
                 if (cell) {
                     cell.textContent = no++;
@@ -851,30 +698,18 @@
                     'status-reopened'
                 );
 
-
                 const v = sel.value;
 
-
                 if (v === 'Open') {
-
                     sel.classList.add('status-open');
-
                 } else if (v === 'In Progress') {
-
                     sel.classList.add('status-progress');
-
                 } else if (v === 'Resolved') {
-
                     sel.classList.add('status-resolved');
-
-                } else if (v === 'Closed') {
-
+                } else if (v === 'Done in Review') {
                     sel.classList.add('status-closed');
-
                 } else if (v === 'Reopened') {
-
                     sel.classList.add('status-reopened');
-
                 }
 
             });
@@ -888,7 +723,6 @@
 
         colorDevSelects();
 
-
         document
             .querySelectorAll('#dev-bugs-table select[name="status"]')
             .forEach(sel => {
@@ -901,6 +735,66 @@
 
     });
 
+    let fixAttachmentTargetForm = null;
+    let fixAttachmentSelect = null;
+
+    function handleDevBugStatusChange(selectEl) {
+        if (selectEl.value === 'Done in Review') {
+            fixAttachmentTargetForm = selectEl.form;
+            fixAttachmentSelect = selectEl;
+            document.getElementById('fixAttachmentInput').value = '';
+            document.getElementById('fixAttachmentModal').classList.remove('hidden');
+            document.getElementById('fixAttachmentModal').classList.add('flex');
+        } else {
+            selectEl.form.submit();
+        }
+    }
+
+    function closeFixAttachmentModal() {
+        document.getElementById('fixAttachmentModal').classList.add('hidden');
+        document.getElementById('fixAttachmentModal').classList.remove('flex');
+        if (fixAttachmentSelect) {
+            fixAttachmentSelect.value = fixAttachmentSelect.dataset.currentStatus;
+            colorDevSelects();
+        }
+        fixAttachmentTargetForm = null;
+        fixAttachmentSelect = null;
+    }
+
+    function confirmFixAttachment() {
+        if (!fixAttachmentTargetForm) return;
+        const fileInput = document.getElementById('fixAttachmentInput');
+        if (fileInput.files && fileInput.files[0]) {
+            const clone = fileInput.cloneNode(true);
+            clone.id = '';
+            clone.name = 'fix_attachment';
+            clone.classList.add('hidden');
+            fixAttachmentTargetForm.appendChild(clone);
+            fixAttachmentTargetForm.enctype = 'multipart/form-data';
+        }
+        document.getElementById('fixAttachmentModal').classList.add('hidden');
+        document.getElementById('fixAttachmentModal').classList.remove('flex');
+        fixAttachmentTargetForm.submit();
+    }
+
 </script>
+
+<div id="fixAttachmentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md p-6 rounded-2xl bg-[#131b2e] border border-slate-800 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-white">Tandai Selesai Diperbaiki</h3>
+            <button type="button" onclick="closeFixAttachmentModal()" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">&times;</button>
+        </div>
+        <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Upload File Bukti Perbaikan <span class="text-slate-600 font-normal normal-case">(Opsional)</span></label>
+            <input type="file" id="fixAttachmentInput" accept="image/*" class="w-full text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white file:text-xs file:font-semibold cursor-pointer">
+            <p class="text-[10px] text-slate-600 mt-1">Format JPG/PNG/GIF/WEBP, maksimal 5MB.</p>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <button type="button" onclick="closeFixAttachmentModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Batal</button>
+            <button type="button" onclick="confirmFixAttachment()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition cursor-pointer">Tandai Selesai</button>
+        </div>
+    </div>
+</div>
 
 @endsection

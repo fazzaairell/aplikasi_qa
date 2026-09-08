@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Runs - QA Management</title>
+    <title>Test Runs - TESTIFY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -33,15 +33,25 @@
     toggleRun(id) {
         this.expandedRuns[id] = !this.expandedRuns[id];
     },
+    init() {
+        const flash = sessionStorage.getItem("flashToast");
+        if (flash) {
+            sessionStorage.removeItem("flashToast");
+            try {
+                const parsed = JSON.parse(flash);
+                showToast(parsed.message, parsed.type);
+            } catch (e) {}
+        }
+    },
     submitTestRun() {
         this.loading = true;
         axios.post("{{ route("test-runs.store") }}", this.form)
             .then(response => {
-                alert(response.data.message);
+                sessionStorage.setItem("flashToast", JSON.stringify({ message: response.data.message, type: "success" }));
                 window.location.href = "?project_id=" + this.form.project_id;
             })
             .catch(error => {
-                alert("Gagal memulai test run.");
+                showToast("Gagal memulai test run.", "error");
                 console.error(error);
             })
             .finally(() => { this.loading = false; });
@@ -55,11 +65,11 @@
     updateTestRun() {
         axios.put(`/test-runs/${this.editForm.id}`, this.editForm)
             .then(response => {
-                alert(response.data.message);
+                sessionStorage.setItem("flashToast", JSON.stringify({ message: response.data.message, type: "success" }));
                 window.location.reload();
             })
             .catch(error => {
-                alert("Gagal memperbarui test run.");
+                showToast("Gagal memperbarui test run.", "error");
                 console.error(error);
             });
     },
@@ -67,11 +77,11 @@
         if (confirm("Apakah Anda yakin ingin menghapus Test Run ini? Semua data hasil tes di dalamnya akan ikut terhapus.")) {
             axios.delete(`/test-runs/${id}`)
                 .then(response => {
-                    alert(response.data.message);
+                    sessionStorage.setItem("flashToast", JSON.stringify({ message: response.data.message, type: "success" }));
                     window.location.reload();
                 })
                 .catch(error => {
-                    alert("Gagal menghapus test run.");
+                    showToast("Gagal menghapus test run.", "error");
                     console.error(error);
                 });
         }
@@ -106,27 +116,35 @@
         "Accept": "application/json"
     }
 })
-        .then(response => { window.location.reload(); })
+        .then(response => {
+            sessionStorage.setItem("flashToast", JSON.stringify({ message: response.data.message || "Hasil tes berhasil disimpan.", type: "success" }));
+            window.location.reload();
+        })
     .catch(error => { 
         let errorMsg;
         if (error.response?.status === 413) {
             errorMsg = "Ukuran gambar terlalu besar untuk diupload ke server. Silakan gunakan gambar yang lebih kecil (maksimal 5MB) atau hubungi admin untuk menaikkan batas upload server.";
         } else if (error.response?.status === 422) {
             const errors = error.response.data.errors;
-            errorMsg = "Validasi gagal:\n" + Object.values(errors).flat().join("\n");
+            errorMsg = "Validasi gagal: " + Object.values(errors).flat().join(", ");
         } else {
             errorMsg = error.response?.data?.message || "Gagal memperbarui status tes.";
         }
-        alert(errorMsg); 
+        showToast(errorMsg, "error"); 
         console.error(error);
     });
     },
     sendUpdateResult(testResultId, payload) {
         axios.patch(`/test-results/${testResultId}/update`, payload)
-            .then(response => { window.location.reload(); })
-            .catch(error => { alert("Gagal memperbarui status tes."); });
+            .then(response => {
+                sessionStorage.setItem("flashToast", JSON.stringify({ message: response.data.message || "Status tes berhasil diperbarui.", type: "success" }));
+                window.location.reload();
+            })
+            .catch(error => { showToast("Gagal memperbarui status tes.", "error"); });
     }
 }'>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 items-end pointer-events-none"></div>
 
     <x-sidebar />
     <!-- MAIN CONTENT -->
@@ -506,6 +524,35 @@
 document.querySelectorAll('.progress-bar').forEach(function (bar) {
     bar.style.width = bar.dataset.width + '%';
 });
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container || !message) return;
+
+    const isError = type === 'error';
+    const toast = document.createElement('div');
+    toast.className = 'pointer-events-auto flex items-start gap-3 px-4 py-3.5 rounded-xl shadow-2xl border text-xs font-semibold max-w-sm transition-all duration-300 ease-out translate-x-6 opacity-0';
+    toast.style.background = isError ? 'rgba(30,10,14,0.97)' : 'rgba(6,26,20,0.97)';
+    toast.style.borderColor = isError ? 'rgba(248,113,113,0.35)' : 'rgba(52,211,153,0.35)';
+    toast.style.color = isError ? '#fca5a5' : '#6ee7b7';
+
+    const icon = isError
+        ? '<svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        : '<svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75l2.25 2.25 7.5-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+
+    toast.innerHTML = icon + '<span class="leading-relaxed"></span>';
+    toast.querySelector('span').textContent = message;
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-6', 'opacity-0');
+    });
+
+    setTimeout(() => {
+        toast.classList.add('translate-x-6', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
 </script>
 <x-profile-modal />
 </body>

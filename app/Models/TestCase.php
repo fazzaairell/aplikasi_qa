@@ -10,12 +10,13 @@ class TestCase extends Model
     use HasFactory;
 
     protected $fillable = [
-        'test_suite_id', 
+        'test_suite_id',
         'requirement_id',  // nullable — boleh null (misal: di-generate dari template)
-        'title', 
-        'steps', 
-        'expected_result', 
-        'priority'
+        'test_case_code',  // kode unik test case, misal: TC-001
+        'title',
+        'steps',           // nullable — detail langkah ada di sub-steps
+        'expected_result',
+        'priority',
     ];
 
     public function testSuite()

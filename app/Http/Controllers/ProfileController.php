@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -9,6 +10,11 @@ use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected FileUploadService $fileUploadService,
+    ) {
+    }
+
     /**
      * Update nama & email.
      */
@@ -28,8 +34,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update foto profile — simpan langsung ke public/uploads/profile-photos/
-     * agar tidak perlu storage symlink (solusi Windows-safe)
+     * Update foto profile.
      */
     public function updatePhoto(Request $request)
     {
@@ -39,28 +44,12 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // Hapus foto lama jika ada
-        if ($user->photo_path) {
-            $oldFile = public_path('uploads/' . $user->photo_path);
-            if (file_exists($oldFile)) {
-                @unlink($oldFile);
-            }
-        }
+        $relativePath = $this->fileUploadService->replace(
+            $request->file('photo'),
+            'profile-photos',
+            $user->photo_path
+        );
 
-        // Simpan file baru ke public/uploads/profile-photos/
-        $file      = $request->file('photo');
-        $filename  = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $directory = public_path('uploads/profile-photos');
-
-        // Buat direktori jika belum ada
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        $file->move($directory, $filename);
-
-        // Simpan path relatif saja (dari uploads/)
-        $relativePath = 'profile-photos/' . $filename;
         $user->update(['photo_path' => $relativePath]);
 
         return back()->with('status', 'photo-updated');

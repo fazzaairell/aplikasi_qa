@@ -60,6 +60,19 @@ return [
             'report' => false,
         ],
 
+        // Disk khusus untuk file yang diupload lewat aplikasi (bug attachment, foto profil, dll).
+        // Root-nya sengaja langsung diarahkan ke public/uploads — TIDAK pakai disk 'public' bawaan
+        // Laravel — supaya tidak perlu `php artisan storage:link` (symlink sering bermasalah di
+        // Windows). Tetap dapat manfaat abstraksi Storage:: (put/delete/url) tanpa symlink.
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/uploads',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

@@ -9,6 +9,18 @@ class  TestResult extends Model
 {
     use HasFactory;
 
+    public const STATUS_UNTESTED = 'Untested';
+    public const STATUS_PASSED = 'Passed';
+    public const STATUS_FAILED = 'Failed';
+    public const STATUS_BLOCKED = 'Blocked';
+
+    public const STATUSES = [
+        self::STATUS_UNTESTED,
+        self::STATUS_PASSED,
+        self::STATUS_FAILED,
+        self::STATUS_BLOCKED,
+    ];
+
     protected $fillable = ['test_run_id', 'test_case_id', 'status', 'executed_by'];
 
     protected static function booted(): void

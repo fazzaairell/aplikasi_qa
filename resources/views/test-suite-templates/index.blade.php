@@ -1,4 +1,3 @@
-```blade
 <!DOCTYPE html>
 <html lang="id" class="h-full">
 
@@ -6,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Template Test Suite - QA Management</title>
+    <title>Template Test Suite - TESTIFY</title>
 
     <meta name="description"
         content="Kelola template test suite untuk digunakan kembali di berbagai proyek.">
@@ -108,7 +107,7 @@
             class="h-16 border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30"
             style="background: rgba(12,15,26,.9); backdrop-filter: blur(12px); border-color: rgba(255,255,255,.06);"
         >
-            <div class="flex items-center space-x-4">
+            <div class="flex items-start space-x-4">
 
                 <button
                     @click="$dispatch('toggle-sidebar')"
@@ -128,21 +127,11 @@
                         ></path>
                     </svg>
                 </button>
-
-                <div>
-                    <div class="text-xs text-violet-400 font-semibold tracking-wider">
-                        PENGUJIAN
-                    </div>
-
-                    <div class="text-sm font-bold text-white">
-                        Template Test Suite
-                    </div>
-                </div>
             </div>
 
             <a
                 href="{{ route('test-suites.index') }}"
-                class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#131b2e] border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white text-xs font-semibold transition"
+                class="flex items-start gap-2 px-4 py-2 rounded-xl bg-[#131b2e] border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white text-xs font-semibold transition"
             >
                 <svg
                     class="w-4 h-4"
@@ -158,38 +147,13 @@
                     />
                 </svg>
 
-                Kembali ke Test Suites
+                Kembali
             </a>
         </header>
 
         <main class="p-8 space-y-8">
 
             <!-- PAGE HEADER -->
-            <div class="flex items-start justify-between">
-
-                <div>
-                    <div class="text-xs text-violet-400 font-semibold tracking-wider mb-1">
-                        TEMPLATE LIBRARY
-                    </div>
-
-                    <h1 class="text-3xl font-bold text-white tracking-tight">
-                        Template Test Suite
-                    </h1>
-
-                    <p class="text-sm text-slate-400 mt-2">
-                        Simpan struktur test suite sebagai template dan gunakan kembali di project manapun.
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-2 mt-1">
-                    <div
-                        class="px-4 py-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold"
-                    >
-                        {{ $templates->count() }} Template Tersimpan
-                    </div>
-                </div>
-
-            </div>
 
             @if(session('success'))
 
@@ -842,4 +806,4 @@
 </body>
 
 </html>
-```
+

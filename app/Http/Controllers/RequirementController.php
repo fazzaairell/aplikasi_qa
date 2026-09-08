@@ -17,8 +17,9 @@ class RequirementController extends Controller
         if ($selectedProjectId) {
             $requirements = Requirement::with('testCases')
                 ->where('project_id', $selectedProjectId)
-                ->orderBy('code', 'asc')
-                ->get();
+                ->get()
+                ->sortBy('code', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
         }
 
         return view('requirements.index', compact('projects', 'requirements', 'selectedProjectId'));

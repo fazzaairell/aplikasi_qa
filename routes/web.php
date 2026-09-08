@@ -15,7 +15,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\DashboardReportController;
 use App\Http\Middleware\PreventBackHistory;
 
 /*
@@ -112,6 +111,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::post('/test-suites', [TestSuiteController::class, 'storeSuite'])->name('test-suites.store');
     Route::delete('/test-suites/{id}', [TestSuiteController::class, 'destroySuite'])->name('test-suites.destroy');
     Route::post('/test-cases', [TestSuiteController::class, 'storeCase'])->name('test-cases.store');
+    Route::put('/test-cases/{id}', [TestSuiteController::class, 'updateCase'])->name('test-cases.update');
     Route::post('/test-case-steps', [TestSuiteController::class, 'storeSubStep'])->name('test-case-steps.store');
     Route::delete('/test-cases/{id}', [TestSuiteController::class, 'destroyCase'])->name('test-cases.destroy');
 
@@ -128,7 +128,6 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('/test-runs/{id}', [TestRunController::class, 'show'])->name('test-runs.show');
     Route::put('/test-runs/{id}', [TestRunController::class, 'update'])->name('test-runs.update');
     Route::delete('/test-runs/{id}', [TestRunController::class, 'destroy'])->name('test-runs.destroy');
-    Route::post('/test-results/{id}/execute', [TestRunController::class, 'updateResult'])->name('test-results.execute');
     Route::patch('/test-results/{testResultId}/update', [TestRunController::class, 'updateResult'])->name('test-results.update');
 
     // 5. Bug Tracker
@@ -136,7 +135,9 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::post('/bugs', [BugController::class, 'store'])->name('bugs.store');
     Route::get('/bugs/history', [BugController::class, 'history'])->name('bugs.history');
     Route::get('/bugs/{id}', [BugController::class, 'show'])->name('bugs.show');
-    Route::patch('/bugs/{id}/status', [BugController::class, 'updateStatus'])->name('bugs.update-status');
+    Route::patch('/bugs/{id}/status', [BugController::class, 'updateStatus'])
+        ->name('bugs.update-status')
+        ->middleware('role:admin,qa lead,qa tester,developer');
 
 
     // 6. Notifikasi
@@ -147,11 +148,9 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     // 7. Test Summary Report
     Route::get('/test-runs/{id}/summary', [TestRunController::class, 'summary'])->name('test-runs.summary');
 
-    // 8. Comprehensive Reports & Dashboard Reports
-    Route::get('/reports/comprehensive', [DashboardReportController::class, 'reports'])->name('reports.comprehensive');
-
-    // 9. Bug History & Report
-    Route::get('/reports/bug-history', [ReportController::class, 'bugHistory'])->name('report.bug-history');
-    Route::get('/reports/bug/{bugId}', [ReportController::class, 'bugDetail'])->name('report.bug-detail');
+    // 8. Reports (Comprehensive RTM, Bug History & Detail) — semua digabung satu ReportController
+    Route::get('/reports/comprehensive', [ReportController::class, 'comprehensive'])->name('reports.comprehensive');
+    Route::get('/reports/bug-history', [ReportController::class, 'bugHistory'])->name('reports.bug-history');
+    Route::get('/reports/bug/{bugId}', [ReportController::class, 'bugDetail'])->name('reports.bug-detail');
 
 });

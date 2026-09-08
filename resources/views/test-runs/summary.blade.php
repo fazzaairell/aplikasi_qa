@@ -8,7 +8,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Summary: {{ $testRun->title }} - QA Platform</title>
+<title>Summary: {{ $testRun->title }} - TESTIFY</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -621,7 +621,7 @@
                                         'Resolved' =>
                                             'color:#6ee7b7;background:rgba(16,185,129,0.12);',
 
-                                        'Closed' =>
+                                        'Resolved' =>
                                             'color:#94a3b8;background:rgba(100,116,139,0.12);',
 
                                         'Reopened' =>
@@ -777,7 +777,7 @@
 
     <div class="text-center text-[11px] text-slate-600 pb-6">
 
-        Laporan dihasilkan oleh QA Platform · {{ now()->format('d M Y, H:i') }}
+        Laporan dihasilkan oleh TESTIFY · {{ now()->format('d M Y, H:i') }}
 
     </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bug History Report - QA Management</title>
+    <title>Bug History Report - TESTIFY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -83,7 +83,7 @@
 
                 @if(request()->filled(['project_id', 'bug_status', 'field_name']))
                     <div class="text-center">
-                        <a href="{{ route('report.bug-history') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
+                        <a href="{{ route('reports.bug-history') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
                             Reset Filter
                         </a>
                     </div>
@@ -137,7 +137,7 @@
                                 @endif
                             </div>
 
-                            <a href="{{ route('report.bug-detail', $history->bug->id) }}" class="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
+                            <a href="{{ route('reports.bug-detail', $history->bug->id) }}" class="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
                                 {{ $history->bug->title }}
                                 <span class="text-slate-500 font-normal">#{{ $history->bug->id }}</span>
                             </a>

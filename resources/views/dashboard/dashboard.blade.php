@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard - QA Management</title>
+    <title>Dashboard - TESTIFY</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -97,26 +97,94 @@
                     </svg>
 
                 </button>
+            </div>
 
-                <div class="mb-4">
-                    <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase pt-5">
-                        Overview
-                    </div>
+            <div class="flex items-center gap-3">
+                {{-- Bell Notifikasi --}}
+                @php
+                    $unreadCount = \App\Models\BugNotification::where('user_id', auth()->id())
+                        ->where('is_read', false)->count();
+                    $recentNotifs = \App\Models\BugNotification::where('user_id', auth()->id())
+                        ->with('bug')->latest()->take(8)->get();
+                @endphp
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <button @click="open = !open"
+                            type="button"
+                            class="relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                            title="Notifikasi">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        @if($unreadCount > 0)
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center"
+                              style="background:#4f46e5;">
+                            {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                        </span>
+                        @endif
+                    </button>
 
-                    <div class="text-sm font-bold text-white">
-                        Dashboard Admin
+                    {{-- DROPDOWN PANEL --}}
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         x-cloak
+                         style="display:none;"
+                         class="absolute right-0 mt-2 w-80 rounded-2xl border shadow-2xl z-50 overflow-hidden"
+                         style="background:#111827; border-color:rgba(255,255,255,0.07);">
+
+                        {{-- Header --}}
+                        <div class="px-4 py-3 border-b flex items-center justify-between" style="border-color:rgba(255,255,255,0.06);">
+                            <span class="text-sm font-bold text-white">Notifikasi</span>
+                            @if($unreadCount > 0)
+                            <form action="{{ route('notifications.read-all') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer">
+                                    Tandai semua dibaca
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+
+                        {{-- List --}}
+                        <div class="max-h-72 overflow-y-auto">
+                            @if($recentNotifs->isEmpty())
+                            <div class="px-4 py-8 text-center text-slate-500 text-xs">Belum ada notifikasi</div>
+                            @else
+                            @foreach($recentNotifs as $notif)
+                            <a href="{{ route('notifications.read', $notif->id) }}"
+                               class="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.03] transition border-b"
+                               style="border-color:rgba(255,255,255,0.04);">
+                                <span class="mt-1 w-2 h-2 rounded-full shrink-0 {{ $notif->is_read ? 'bg-slate-700' : 'bg-indigo-500' }}"></span>
+                                <div class="min-w-0">
+                                    <p class="text-xs {{ $notif->is_read ? 'text-slate-500' : 'text-slate-200' }} leading-snug">
+                                        {{ $notif->message }}
+                                    </p>
+                                    <p class="text-[10px] text-slate-600 mt-1">{{ $notif->created_at->diffForHumans() }}</p>
+                                </div>
+                            </a>
+                            @endforeach
+                            @endif
+                        </div>
+
+                        {{-- Footer --}}
+                        <a href="{{ route('notifications.timeline') }}" class="block px-4 py-2.5 text-center text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold border-t transition" style="border-color:rgba(255,255,255,0.06);">
+                            Lihat semua notifikasi →
+                        </a>
                     </div>
                 </div>
 
-            </div>
-
-            <div class="flex items-center gap-2">
                 <span class="text-[11px] text-slate-500">
                     {{ now()->translatedFormat('d F Y') }}
                 </span>
             </div>
 
         </header>
+
 
 
         <!-- DASHBOARD BODY -->
@@ -495,7 +563,7 @@
                                         'border' => 'rgba(16,185,129,0.2)'
                                     ],
 
-                                    'Closed' => [
+                                    'Resolved' => [
                                         'bg' => 'rgba(100,116,139,0.1)',
                                         'text' => '#94a3b8',
                                         'border' => 'rgba(100,116,139,0.2)'

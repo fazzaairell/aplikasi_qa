@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>Bug Detail - QA Management</title>
+<title>Bug Detail - TESTIFY</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -121,7 +121,7 @@
             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
 
                 <a
-                    href="{{ route('report.bug-history') }}"
+                    href="{{ route('reports.bug-history') }}"
                     class="hover:text-indigo-400 transition"
                 >
                     Riwayat Bug
@@ -139,7 +139,7 @@
         <div class="flex items-center gap-3">
 
             <a
-                href="{{ route('report.bug-history') }}"
+                href="{{ route('reports.bug-history') }}"
                 class="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] rounded-xl transition"
                 style="background: #111827;"
             >
@@ -185,7 +185,7 @@
                     'style' => 'bg-violet-500/[0.12] text-violet-300 border-violet-500/35',
                 ],
 
-                'Closed' => [
+                'Resolved' => [
                     'class' => 'bg-emerald-400',
                     'style' => 'bg-emerald-500/[0.12] text-emerald-300 border-emerald-500/35',
                 ],
@@ -530,7 +530,7 @@
                                 </div>
 
                                 <div
-                                    class="text-sm font-medium mt-1 {{ $bug->due_date && $bug->due_date->isPast() && $bug->status !== 'Closed' ? 'text-rose-400' : 'text-slate-200' }}"
+                                    class="text-sm font-medium mt-1 {{ $bug->due_date && $bug->due_date->isPast() && $bug->status !== 'Resolved' ? 'text-rose-400' : 'text-slate-200' }}"
                                 >
                                     {{ $bug->due_date ? $bug->due_date->format('d M Y') : '—' }}
                                 </div>

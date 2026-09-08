@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - QA Management</title>
+    <title>Login - TESTIFY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -328,7 +328,7 @@
             <span class="word purple">QA</span>
             <span class="word purple">Management</span>
         </h1>
-        <p class="subtitle subtitle-anim">Masuk untuk melanjutkan ke platform pengujian.</p>
+        <p class="subtitle subtitle-anim">Masuk</p>
 
         @if($errors->any())
             <div class="error-box form-anim">{{ $errors->first() }}</div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\TestRun;
+use App\Models\TestResult;
 use App\Models\Bug;
 use App\Models\TestCase;
 use App\Models\Requirement;
@@ -23,18 +24,18 @@ class DashboardController extends Controller
         $totalCases = TestCase::count();
 
         // Pass Rate — dihitung dari tabel test_results (status konsisten "Passed", huruf besar)
-        $passedCount  = DB::table('test_results')->where('status', 'Passed')->count();
+        $passedCount  = DB::table('test_results')->where('status', TestResult::STATUS_PASSED)->count();
         $totalResults = DB::table('test_results')->count();
         $passRate = $totalResults > 0 ? round(($passedCount / $totalResults) * 100) : 0;
 
         // Blocked dihitung dari test_results, bukan test_runs (test run cuma punya status Active/Completed)
-        $blockedCount = DB::table('test_results')->where('status', 'Blocked')->count();
+        $blockedCount = DB::table('test_results')->where('status', TestResult::STATUS_BLOCKED)->count();
 
         // Bug aktif
-        $activeBugs = Bug::whereIn('status', ['Open', 'In Progress', 'Reopened'])->count();
+        $activeBugs = Bug::whereIn('status', [Bug::STATUS_OPEN, Bug::STATUS_IN_PROGRESS, Bug::STATUS_REOPENED])->count();
 
         // Test run yang masih berjalan
-        $activeTestRuns = TestRun::with(['testResults', 'project'])->where('status', 'Active')->latest()->take(2)->get();
+        $activeTestRuns = TestRun::with(['testResults', 'project'])->where('status', TestRun::STATUS_ACTIVE)->latest()->take(2)->get();
 
         // List untuk ditampilkan
         $recentBugs = Bug::latest()->take(4)->get();
@@ -62,10 +63,10 @@ class DashboardController extends Controller
         }
         $testResults = $query->get();
 
-        $passed   = $testResults->where('status', 'Passed')->count();
-        $failed   = $testResults->where('status', 'Failed')->count();
-        $blocked  = $testResults->where('status', 'Blocked')->count();
-        $untested = $testResults->where('status', 'Untested')->count();
+        $passed   = $testResults->where('status', TestResult::STATUS_PASSED)->count();
+        $failed   = $testResults->where('status', TestResult::STATUS_FAILED)->count();
+        $blocked  = $testResults->where('status', TestResult::STATUS_BLOCKED)->count();
+        $untested = $testResults->where('status', TestResult::STATUS_UNTESTED)->count();
         $total    = $testResults->count();
 
         // Data untuk card navigasi — ikut difilter berdasarkan project_id kalau dipilih
@@ -93,14 +94,14 @@ class DashboardController extends Controller
         $totalBugs = $bugQuery->count();
         $openBugs = $bugQuery->clone()->where('status', 'Open')->count();
         $inProgressBugs = $bugQuery->clone()->where('status', 'In Progress')->count();
-        $closedBugs = $bugQuery->clone()->where('status', 'Closed')->count();
+        $resolvedBugs = $bugQuery->clone()->where('status', 'Resolved')->count();
 
         $recentRuns = TestRun::with('project')->latest()->take(5)->get();
 
         return view('dashboard.qa', compact(
             'passed', 'failed', 'blocked', 'untested', 'total', 'recentRuns', 'projects',
             'totalRequirements', 'totalTestSuites', 'totalTestRuns', 'totalProjects',
-            'totalBugs', 'openBugs', 'inProgressBugs', 'closedBugs'
+            'totalBugs', 'openBugs', 'inProgressBugs', 'resolvedBugs'
         ));
     }
 

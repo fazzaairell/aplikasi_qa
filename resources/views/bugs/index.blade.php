@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bug Tracker - QA Management</title>
+    <title>Bug Tracker - TESTIFY</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -149,16 +149,16 @@
     x-data="{ sidebarOpen: false, showLaporanModal: {{ $errors->any() || session('success') ? 'true' : 'false' }} }">
 
     {{-- ═══ SIDEBAR (Admin & QA Tester) ═══ --}}
-    @if(auth()->user()->role !== 'Developer')
+    @if(! auth()->user()->isDeveloper())
         <x-sidebar />
     @endif
 
     {{-- ═══ MAIN WRAPPER ═══ --}}
     <div
-        class="{{ auth()->user()->role !== 'Developer' ? 'flex-1 flex flex-col min-w-0 overflow-y-auto h-full' : 'w-full flex flex-col min-h-screen' }}">
+        class="{{ ! auth()->user()->isDeveloper() ? 'flex-1 flex flex-col min-w-0 overflow-y-auto h-full' : 'w-full flex flex-col min-h-screen' }}">
 
         {{-- ─── TOPBAR ─────────────────────────────────────────────────────────── --}}
-        @if(auth()->user()->role !== 'Developer')
+        @if(! auth()->user()->isDeveloper())
 
             {{-- Admin / QA Tester: simple topbar dengan search --}}
             <header
@@ -402,23 +402,10 @@
 
         {{-- ─── MAIN CONTENT ────────────────────────────────────────────────────── --}}
         <main
-            class="fade-in {{ auth()->user()->role === 'Developer' ? 'p-8 space-y-6 max-w-7xl mx-auto w-full' : 'p-4 sm:p-6 lg:p-8 space-y-5' }}">
+            class="fade-in {{ auth()->user()->isDeveloper() ? 'p-8 space-y-6 max-w-7xl mx-auto w-full' : 'p-4 sm:p-6 lg:p-8 space-y-5' }}">
 
             {{-- PAGE HEADER --}}
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-
-                <div>
-
-                    <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mb-1">
-                        PELACAKAN
-                    </div>
-
-                    <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                        {{ $isHistory ? 'Riwayat Bug' : 'Bug Tracker' }}
-                    </h1>
-
-                </div>
-
                 <div class="flex items-center gap-3">
 
                     @if($isHistory)
@@ -439,7 +426,7 @@
 
                     @endif
 
-                    @if(auth()->user()->role !== 'Developer')
+                    @if(! auth()->user()->isDeveloper())
 
                         <button id="btn-laporan-bug" @click="showLaporanModal = true"
                             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition shadow-lg cursor-pointer"
@@ -471,7 +458,7 @@
                     $countProgress = $bugs->where('status', 'In Progress')->count();
                     $countResolved = $bugs->where('status', 'Resolved')->count();
                     $countReopened = $bugs->where('status', 'Reopened')->count();
-                    $countClosed = $bugs->where('status', 'Closed')->count();
+                    $countReview = $bugs->where('status', 'Done in Review')->count();
                 @endphp
 
                 <div class="rounded-2xl p-4 space-y-1 hover:scale-105 transition duration-200"
@@ -530,11 +517,11 @@
                     style="background:rgba(100,116,139,0.15); border:1px solid rgba(100,116,139,0.25);">
 
                     <div class="text-2xl font-bold text-white">
-                        {{ $countClosed }}
+                        {{ $countReview }}
                     </div>
 
                     <div class="text-xs font-semibold" style="color:#94a3b8">
-                        Closed
+                        Done in Review
                     </div>
 
                 </div>
@@ -578,10 +565,7 @@
                             Resolved
                         </option>
 
-                        <option value="Closed" {{ request('status') == 'Closed' ? 'selected' : '' }}>
-                            Closed
-                        </option>
-
+                        
                         <option value="Reopened" {{ request('status') == 'Reopened' ? 'selected' : '' }}>
                             Reopened
                         </option>
@@ -907,7 +891,7 @@
                                                     @elseif($bug->status === 'In Progress')
                                                         style="background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);"
 
-                                                    @elseif(in_array($bug->status, ['Resolved', 'Closed', 'Done in Review']))
+                                                    @elseif(in_array($bug->status, ['Resolved', 'Done in Review']))
                                                         style="background:rgba(16,185,129,0.1);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3);"
 
                                                     @else
@@ -930,12 +914,12 @@
                                                     <select name="status"
                                                         onchange="this.form.submit()"
                                                         class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer outline-none border-2 transition-all bg-[#0c0f1a]"
-                                                        @if(auth()->user()->role === 'Developer' && in_array($bug->status, ['Resolved', 'Closed', 'Reopened']))
+                                                        @if(auth()->user()->isDeveloper() && in_array($bug->status, ['Resolved', 'Reopened']))
                                                             disabled
                                                         @endif
                                                     >
 
-                                                        @if(auth()->user()->role === 'Developer')
+                                                        @if(auth()->user()->isDeveloper())
 
                                                             <option value="Open"
                                                                 {{ $bug->status === 'Open' ? 'selected' : '' }}
@@ -953,7 +937,7 @@
                                                                 Done in Review
                                                             </option>
 
-                                                            @if(in_array($bug->status, ['Resolved', 'Closed', 'Reopened']))
+                                                            @if(in_array($bug->status, ['Resolved', 'Reopened']))
 
                                                                 <option value="{{ $bug->status }}" selected>
                                                                     {{ $bug->status }}
@@ -983,12 +967,7 @@
                                                                 Resolved
                                                             </option>
 
-                                                            <option value="Closed"
-                                                                {{ $bug->status === 'Closed' ? 'selected' : '' }}>
-                                                                Closed
-                                                            </option>
-
-                                                            <option value="Reopened"
+                                                                                                                        <option value="Reopened"
                                                                 {{ $bug->status === 'Reopened' ? 'selected' : '' }}>
                                                                 Reopened
                                                             </option>
@@ -1088,7 +1067,7 @@
 
 
     {{-- ═══ MODAL LAPORAN BUG ═══ --}}
-    @if(auth()->user()->role !== 'Developer')
+    @if(! auth()->user()->isDeveloper())
 
         <div x-show="showLaporanModal" x-cloak
             class="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
@@ -1377,7 +1356,6 @@
                     'status-open',
                     'status-progress',
                     'status-resolved',
-                    'status-closed',
                     'status-reopened'
                 );
 
@@ -1389,8 +1367,6 @@
                     sel.classList.add('status-progress');
                 } else if (v === 'Resolved') {
                     sel.classList.add('status-resolved');
-                } else if (v === 'Closed') {
-                    sel.classList.add('status-closed');
                 } else if (v === 'Reopened') {
                     sel.classList.add('status-reopened');
                 }
