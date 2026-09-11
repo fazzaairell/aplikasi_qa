@@ -91,6 +91,11 @@
                         @change="
                             const file = $event.target.files[0];
                             if (file) {
+                                if (file.size > 5 * 1024 * 1024) {
+                                    alert('Format gambar terlalu besar! Maksimal 5MB.');
+                                    $event.target.value = '';
+                                    return;
+                                }
                                 preview = URL.createObjectURL(file);
                                 $el.closest('form').requestSubmit();
                             }
@@ -200,3 +205,11 @@
         </div>
     </div>
 </div>
+
+@if (session('status') === 'photo-updated')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            alert('Foto profile berhasil dipasang.');
+        });
+    </script>
+@endif

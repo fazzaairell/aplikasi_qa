@@ -6,6 +6,8 @@
     <title>Bug History Report - TESTIFY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('image/icon-aldo.png') }}">
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         * { font-family: 'Inter', sans-serif; box-sizing: border-box; }

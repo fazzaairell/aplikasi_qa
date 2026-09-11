@@ -24,6 +24,8 @@
     input.date-editable { color-scheme: dark; }
     input.date-editable::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
     </style>
+    <link rel="icon" type="image/x-icon" href="{{ asset('image/icon-aldo.png') }}">
+
 </head>
 <body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false }">
 

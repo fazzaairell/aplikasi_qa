@@ -6,6 +6,7 @@
     <title>Login - TESTIFY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ asset('image/icon-aldo.png') }}">
     <style>
         * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
 
