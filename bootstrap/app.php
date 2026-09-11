@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'role'  => CheckRole::class, 
         ]);
+        
+        $middleware->trustProxies(
+            at: '*'
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -31,5 +31,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/fazzaairell/app:${{ github.sha }}
-            ghcr.io/fazzaairell/app:1.0.1
+            ghcr.io/fazzaairell/app:1.0.2
 
