@@ -111,7 +111,7 @@ class BugController extends Controller
 
         $this->notifyNewBug($bug);
 
-        return back()->with('success', 'Bug berhasil dilaporkan!');
+        return back()->with('success', 'Bug berhasil dilaporkan!')->with('bug_reported', true);
     }
 
     /**
@@ -124,6 +124,7 @@ class BugController extends Controller
         if ($bug->assigned_to) {
             BugNotification::create([
                 'user_id' => $bug->assigned_to,
+                'causer_id' => $reporter->id,
                 'bug_id'  => $bug->id,
                 'type'    => 'bug_reported',
                 'message' => "🐛 Bug baru dilaporkan oleh {$reporter->name}: \"{$bug->title}\". Segera ditangani!",
@@ -135,6 +136,7 @@ class BugController extends Controller
         foreach ($admins as $admin) {
             BugNotification::create([
                 'user_id' => $admin->id,
+                'causer_id' => $reporter->id,
                 'bug_id'  => $bug->id,
                 'type'    => 'bug_reported',
                 'message' => "📋 Bug baru: \"{$bug->title}\" dilaporkan oleh {$reporter->name}.",
@@ -179,7 +181,9 @@ class BugController extends Controller
             $bug,
             Auth::user(),
             $request->validated('status'),
-            $request->file('fix_attachment')
+            $request->file('fix_attachment'),
+            $request->validated('start_date'),
+            $request->validated('finish_date'),
         );
 
         if ($request->expectsJson()) {

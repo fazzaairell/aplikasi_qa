@@ -16,7 +16,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        $query = BugNotification::with(['bug.testResult.testCase.testSuite.project', 'user'])
+        $query = BugNotification::with(['bug.testResult.testCase.testSuite.project', 'bug.assignee', 'user', 'causer'])
             ->where('user_id', $user->id)
             ->latest('created_at');
 

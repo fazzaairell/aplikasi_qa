@@ -139,6 +139,7 @@ class TestRunController extends Controller
 
                     BugNotification::create([
                         'user_id' => $bug->assigned_to,
+                        'causer_id' => Auth::id(),
                         'bug_id'  => $bug->id,
                         'type'    => 'bug_reported',
                         'message' => "🐛 Bug baru dilaporkan oleh {$reporterName} pada project \"{$projectName}\": \"{$bug->title}\". Segera ditangani!",
@@ -151,6 +152,7 @@ class TestRunController extends Controller
                 foreach ($admins as $admin) {
                     BugNotification::create([
                         'user_id' => $admin->id,
+                        'causer_id' => Auth::id(),
                         'bug_id'  => $bug->id,
                         'type'    => 'bug_reported',
                         'message' => "📋 Bug baru: \"{$bug->title}\" dilaporkan dari Test Run.",

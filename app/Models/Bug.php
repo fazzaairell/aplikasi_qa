@@ -30,6 +30,7 @@ class Bug extends Model
         'reported_by',
         'due_date',
         'finish_date',
+        'start_date',
         'attachment',
         'fix_attachment',
     ];
@@ -37,6 +38,7 @@ class Bug extends Model
     protected $casts = [
         'due_date' => 'date',
         'finish_date' => 'date',
+        'start_date' => 'date',
     ];
 
     public function testResult()

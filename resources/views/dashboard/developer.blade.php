@@ -1,88 +1,40 @@
-@extends('layouts.topbar')
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Developer - TESTIFY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0f1a; } ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:#0c0f1a} ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px}
 
-@section('title', 'Dashboard Developer - TESTIFY')
+    select.status-open { border-color: rgba(239,68,68,0.5); color: #fca5a5; }
+    select.status-progress { border-color: rgba(99,102,241,0.5); color: #a5b4fc; }
+    select.status-resolved { border-color: rgba(16,185,129,0.5); color: #6ee7b7; }
+    select.status-closed { border-color: rgba(100,116,139,0.5); color: #94a3b8; }
+    select.status-reopened { border-color: rgba(168,85,247,0.5); color: #d8b4fe; }
+    tr.bug-row:hover td { background: rgba(99,102,241,0.04); }
+    .filter-btn { white-space: nowrap; }
+    .filter-btn.active { background: rgba(99,102,241,0.15) !important; color: #818cf8 !important; border-color: rgba(99,102,241,0.35) !important; }
+    .filter-scroll { overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    select[name="status"] { background-color: #0c0f1a !important; color: #e2e8f0 !important; }
+    select[name="status"] option { background-color: #0c0f1a !important; color: #e2e8f0 !important; }
+    input.date-editable { color-scheme: dark; }
+    input.date-editable::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-100 flex overflow-hidden" x-data="{ sidebarOpen: false }">
 
-@section('hero')
+    <x-sidebar />
 
-    <!-- <div class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mb-1 max-w-7xl mx-auto w-full">
-        WORKSPACE
-    </div>
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto h-full">
 
-    <h1 class="text-3xl font-bold text-white tracking-tight max-w-7xl mx-auto w-full">
-        Developer Workspace
-    </h1>
+        <main class="p-6 sm:p-8 space-y-6 max-w-screen-2xl mx-auto w-full">
 
-    <p class="text-sm text-slate-400 mt-1 max-w-7xl mx-auto w-full">
-        Ini daftar bug yang perlu kamu tangani.
-    </p> -->
 
-@endsection
-
-@section('content')
-
-<style>
-
-    select.status-open {
-        border-color: rgba(239,68,68,0.5);
-        color: #fca5a5;
-    }
-
-    select.status-progress {
-        border-color: rgba(99,102,241,0.5);
-        color: #a5b4fc;
-    }
-
-    select.status-resolved {
-        border-color: rgba(16,185,129,0.5);
-        color: #6ee7b7;
-    }
-
-    select.status-closed {
-        border-color: rgba(100,116,139,0.5);
-        color: #94a3b8;
-    }
-
-    select.status-reopened {
-        border-color: rgba(168,85,247,0.5);
-        color: #d8b4fe;
-    }
-
-    tr.bug-row:hover td {
-        background: rgba(99,102,241,0.04);
-    }
-
-    .filter-btn {
-        white-space: nowrap;
-    }
-
-    .filter-btn.active {
-        background: rgba(99,102,241,0.15) !important;
-        color: #818cf8 !important;
-        border-color: rgba(99,102,241,0.35) !important;
-    }
-
-    .filter-scroll {
-        overflow-x: auto;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    .filter-scroll::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Background dropdown status */
-    select[name="status"] {
-        background-color: #0c0f1a !important;
-        color: #e2e8f0 !important;
-    }
-
-    select[name="status"] option {
-        background-color: #0c0f1a !important;
-        color: #e2e8f0 !important;
-    }
-
-</style>
 
 
 @php
@@ -276,7 +228,11 @@
                     </th>
 
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">
-                        Tanggal Test
+                        DUE DATE
+                    </th>
+
+                    <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        Start Date
                     </th>
 
                     <th class="px-4 py-3.5 text-left text-slate-400 font-semibold uppercase tracking-wider whitespace-nowrap min-w-[100px]">
@@ -417,16 +373,48 @@
                                 @endif
                             </td>
 
-                            <td class="px-4 py-3.5 whitespace-nowrap">
-                                @if($bug->finish_date)
-                                    <span
-                                        class="px-2 py-1 rounded-lg text-[10px] font-semibold"
-                                        style="background:rgba(16,185,129,0.1); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25);">
-                                        {{ $bug->finish_date->format('d M Y') }}
-                                    </span>
-                                @else
-                                    <span class="text-slate-600">—</span>
-                                @endif
+                            {{-- Start Date: sekarang bisa diisi/diubah manual langsung dari tabel --}}
+                            <td class="px-4 py-3.5 whitespace-nowrap" onclick="event.stopPropagation()">
+                                <form
+                                    action="{{ route('bugs.update-status', $bug->id) }}"
+                                    method="POST"
+                                    class="inline-flex">
+
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="{{ $bug->status }}">
+
+                                    <input
+                                        type="date"
+                                        name="start_date"
+                                        value="{{ $bug->start_date?->format('Y-m-d') }}"
+                                        onchange="this.form.submit()"
+                                        class="date-editable px-2 py-1 rounded-lg text-[10px] font-semibold outline-none border transition"
+                                        style="background:rgba(99,102,241,0.1); color:#a5b4fc; border-color:rgba(99,102,241,0.25);"
+                                        title="Klik untuk mengisi/mengubah Start Date">
+                                </form>
+                            </td>
+
+                            {{-- Finish Date: sekarang bisa diisi/diubah manual langsung dari tabel --}}
+                            <td class="px-4 py-3.5 whitespace-nowrap" onclick="event.stopPropagation()">
+                                <form
+                                    action="{{ route('bugs.update-status', $bug->id) }}"
+                                    method="POST"
+                                    class="inline-flex">
+
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="{{ $bug->status }}">
+
+                                    <input
+                                        type="date"
+                                        name="finish_date"
+                                        value="{{ $bug->finish_date?->format('Y-m-d') }}"
+                                        onchange="this.form.submit()"
+                                        class="date-editable px-2 py-1 rounded-lg text-[10px] font-semibold outline-none border transition"
+                                        style="background:rgba(16,185,129,0.1); color:#6ee7b7; border-color:rgba(16,185,129,0.25);"
+                                        title="Klik untuk mengisi/mengubah Finish Date">
+                                </form>
                             </td>
 
                             <td class="px-4 py-3.5 whitespace-nowrap">
@@ -738,17 +726,30 @@
     let fixAttachmentTargetForm = null;
     let fixAttachmentSelect = null;
 
-    function handleDevBugStatusChange(selectEl) {
-        if (selectEl.value === 'Done in Review') {
-            fixAttachmentTargetForm = selectEl.form;
-            fixAttachmentSelect = selectEl;
-            document.getElementById('fixAttachmentInput').value = '';
-            document.getElementById('fixAttachmentModal').classList.remove('hidden');
-            document.getElementById('fixAttachmentModal').classList.add('flex');
-        } else {
-            selectEl.form.submit();
-        }
+    function todayIsoDate() {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     }
+
+    // FIX: Start Date & Finish Date sekarang diisi langsung dari kolom
+    // tabelnya masing-masing (input type="date"), jadi popup konfirmasi
+    // tanggal saat ganti status sudah tidak diperlukan lagi. Modal hanya
+    // dipakai untuk upload bukti perbaikan (opsional) saat status
+    // diubah ke "Done in Review".
+function handleDevBugStatusChange(selectEl) {
+    if (selectEl.value === 'Done in Review') {
+        // cuma modal upload bukti perbaikan (opsional), TIDAK ada input tanggal di sini
+        fixAttachmentTargetForm = selectEl.form;
+        fixAttachmentSelect = selectEl;
+        document.getElementById('fixAttachmentInput').value = '';
+        document.getElementById('fixAttachmentModal').classList.remove('hidden');
+        document.getElementById('fixAttachmentModal').classList.add('flex');
+    } else {
+        // "In Progress" dan status lain: langsung submit, tanpa trigger apapun ke start/finish date
+        selectEl.form.submit();
+    }
+}
 
     function closeFixAttachmentModal() {
         document.getElementById('fixAttachmentModal').classList.add('hidden');
@@ -763,6 +764,7 @@
 
     function confirmFixAttachment() {
         if (!fixAttachmentTargetForm) return;
+
         const fileInput = document.getElementById('fixAttachmentInput');
         if (fileInput.files && fileInput.files[0]) {
             const clone = fileInput.cloneNode(true);
@@ -772,6 +774,7 @@
             fixAttachmentTargetForm.appendChild(clone);
             fixAttachmentTargetForm.enctype = 'multipart/form-data';
         }
+
         document.getElementById('fixAttachmentModal').classList.add('hidden');
         document.getElementById('fixAttachmentModal').classList.remove('flex');
         fixAttachmentTargetForm.submit();
@@ -797,4 +800,9 @@
     </div>
 </div>
 
-@endsection
+        </main>
+    </div>
+
+    <x-profile-modal />
+</body>
+</html>

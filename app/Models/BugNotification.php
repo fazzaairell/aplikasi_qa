@@ -15,6 +15,7 @@ class BugNotification extends Model
 
     protected $fillable = [
         'user_id',
+        'causer_id',
         'bug_id',
         'type',
         'message',
@@ -28,6 +29,15 @@ class BugNotification extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * User yang memicu notifikasi ini (mis. developer yang mengubah
+     * status bug), berbeda dengan user() yang merupakan penerimanya.
+     */
+    public function causer()
+    {
+        return $this->belongsTo(User::class, 'causer_id');
     }
 
     public function bug()
