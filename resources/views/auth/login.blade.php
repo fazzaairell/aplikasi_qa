@@ -317,7 +317,7 @@
             </div>
             <div style="width: 1px; height: 22px; background: rgba(255,255,255,0.08);"></div>
             <div>
-                <span class="brand-text">Testify</span>
+                <span class="brand-text">Testify new</span>
             </div>
         </div>
 

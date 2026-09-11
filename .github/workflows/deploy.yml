@@ -3,7 +3,7 @@ name: Build Laravel Docker Image
 on:
   push:
     branches:
-      - staging
+      - stag
 
 permissions:
   contents: read
@@ -32,4 +32,3 @@ jobs:
           tags: |
             ghcr.io/fazzaairell/app:${{ github.sha }}
             ghcr.io/fazzaairell/app:1.0.2
-
