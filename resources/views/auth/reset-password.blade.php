@@ -13,7 +13,7 @@
 
         <div class="mb-8">
             <h1 class="text-3xl font-bold tracking-tight text-white mb-2">Buat Password Baru</h1>
-            <p class="text-sm text-slate-400">Masukkan password baru untuk akun kamu.</p>
+            <p class="text-sm text-slate-400">Masukkan password baru.</p>
         </div>
 
         @if($errors->any())
