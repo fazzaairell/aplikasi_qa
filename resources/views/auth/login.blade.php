@@ -326,7 +326,7 @@
             <span class="word">Welcome</span>
             <span class="word">to </span>
             <span class="word purple">QA</span>
-            <span class="word purple">Management</span>
+            <span class="word purple">Manajemen</span>
         </h1>
         <p class="subtitle subtitle-anim">Masuk</p>
 
